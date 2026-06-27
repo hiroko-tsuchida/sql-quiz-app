@@ -1,0 +1,319 @@
+"""SQL 問題集アプリ（Streamlit / MySQL 構文）— レベル攻略モード。
+
+使い方:
+    streamlit run app.py
+
+遊び方:
+    - Lv1（やさしい）から順に挑戦する。レベルは全部で5つ。
+    - 各問題は4択。正しい SQL を選んで「答え合わせ」する。
+    - レベルの問題を最後まで解くと、点数と間違えた問題が出る。
+    - 間違えた問題は「もう一度」で再挑戦。全問正解すると【合格】。
+    - 合格すると次のレベルが解放される（まだ解いていない先のレベルはロック）。
+"""
+
+import streamlit as st
+
+import schema
+from problems import LEVELS, PROBLEMS
+
+st.set_page_config(page_title="SQL 問題集（MySQL）", page_icon="🗃️", layout="wide")
+
+MAX_LEVEL = len(LEVELS)                        # 5
+_BY_ID = {p["id"]: p for p in PROBLEMS}        # id から問題を引く辞書
+_LEVEL_INFO = {d["level"]: d for d in LEVELS}  # level から {title, desc} を引く
+
+
+def problems_for_level(level: int):
+    """その level の問題を id 順で返す。"""
+    return [p for p in PROBLEMS if p["level"] == level]
+
+
+# =============================================================================
+# セッション状態（アプリが覚えておく値）の初期化
+# =============================================================================
+DEFAULTS = {
+    "unlocked": 1,        # 解放済みの最高レベル
+    "selected_level": 1,  # いま画面で見ているレベル
+    "passed": set(),      # 合格したレベルの集合
+    "level_score": {},    # {level: (初回正解数, 問題数)}
+    # --- 1ラウンド分の攻略状態 ---
+    "active": False,      # 攻略中（問題を解いている最中）か
+    "finished": False,    # ラウンドを解き終えて結果画面を表示中か
+    "queue": [],          # このラウンドで解く問題 id のリスト
+    "pos": 0,             # いまラウンド内の何問目か
+    "wrong": set(),       # このラウンドで間違えた id
+    "answered": False,    # 今の問題を答え合わせ済みか
+    "last_correct": False,  # 今の問題が正解だったか
+    "round_level": 1,     # このラウンドが属するレベル
+    "is_first_round": True,  # 初回ラウンド（点数を記録する）か
+    "first_correct": 0,   # 初回ラウンドの正解数
+    "round_id": 0,        # ラジオの key を毎ラウンド変えるための通し番号
+}
+for key, value in DEFAULTS.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
+ss = st.session_state
+
+
+# =============================================================================
+# 状態を変える関数（ボタンの on_click から呼ぶ。手動 st.rerun は使わない）
+# =============================================================================
+def select_level(level: int):
+    """サイドバーでレベルを選んだとき。攻略状態をリセットしてスタート画面へ。"""
+    ss.selected_level = level
+    ss.active = False
+    ss.finished = False
+
+
+def start_round(level: int, ids: list, is_first: bool):
+    """1ラウンドを開始する。"""
+    ss.round_level = level
+    ss.queue = list(ids)
+    ss.pos = 0
+    ss.wrong = set()
+    ss.answered = False
+    ss.last_correct = False
+    ss.is_first_round = is_first
+    ss.first_correct = 0
+    ss.active = True
+    ss.finished = False
+    ss.round_id += 1
+
+
+def check_answer(problem: dict, radio_key: str):
+    """『答え合わせ』ボタン。選んだ選択肢を採点する。"""
+    chosen_label = ss[radio_key]
+    chosen_index = ord(chosen_label) - ord("A")
+    is_correct = chosen_index == problem["answer_index"]
+    ss.answered = True
+    ss.last_correct = is_correct
+    if is_correct:
+        if ss.is_first_round:
+            ss.first_correct += 1
+    else:
+        ss.wrong.add(problem["id"])
+
+
+def go_next():
+    """次の問題へ。最後まで解いたら結果画面へ。"""
+    ss.pos += 1
+    ss.answered = False
+    ss.last_correct = False
+    if ss.pos >= len(ss.queue):
+        ss.active = False
+        ss.finished = True
+        # 初回ラウンドの結果を、このレベルの点数として記録する
+        if ss.is_first_round:
+            ss.level_score[ss.round_level] = (ss.first_correct, len(ss.queue))
+
+
+def reset_progress():
+    """進捗をすべて初期化する。"""
+    for key, value in DEFAULTS.items():
+        # set/list/dict は新しい空オブジェクトに（参照の共有を避ける）
+        ss[key] = type(value)() if isinstance(value, (set, list, dict)) else value
+
+
+# =============================================================================
+# サイドバー：レベル選択と進捗
+# =============================================================================
+st.sidebar.title("🗃️ SQL 問題集")
+st.sidebar.caption("MySQL の書き方で学ぶ・Lv1〜Lv5")
+
+st.sidebar.subheader("レベルを選ぶ")
+for info in LEVELS:
+    lv = info["level"]
+    n = len(problems_for_level(lv))
+    if lv in ss.passed:
+        mark, locked = "✅", False
+    elif lv <= ss.unlocked:
+        mark, locked = "▶️", False
+    else:
+        mark, locked = "🔒", True
+
+    label = f"{mark} Lv{lv} {info['title']}（{n}問）"
+    if locked:
+        st.sidebar.button(label, key=f"lv_{lv}", disabled=True, use_container_width=True)
+    else:
+        st.sidebar.button(
+            label,
+            key=f"lv_{lv}",
+            type="primary" if lv == ss.selected_level else "secondary",
+            use_container_width=True,
+            on_click=select_level,
+            args=(lv,),
+        )
+
+# レベルごとの点数
+st.sidebar.divider()
+st.sidebar.subheader("レベルごとの点数")
+for info in LEVELS:
+    lv = info["level"]
+    score = ss.level_score.get(lv)
+    status = "（未挑戦）"
+    if score is not None:
+        correct, total = score
+        status = f"{correct} / {total} 点"
+    if lv in ss.passed:
+        status += "　🎉合格"
+    st.sidebar.write(f"Lv{lv}：{status}")
+
+st.sidebar.divider()
+st.sidebar.metric("合格したレベル", f"{len(ss.passed)} / {MAX_LEVEL}")
+st.sidebar.button("進捗をリセット", on_click=reset_progress)
+
+
+# =============================================================================
+# メイン画面
+# =============================================================================
+st.title("SQL 問題集（MySQL）")
+
+# --- テーブル定義とサンプルデータ（折りたたみ）-------------------------------
+with st.expander("📋 テーブル定義とサンプルデータを見る", expanded=False):
+    st.caption("問題はこのデータベースを題材にしています。いつでもここで確認できます。")
+    st.code(schema.CREATE_STATEMENTS, language="sql")
+    for table_name, df in schema.TABLES.items():
+        st.markdown(f"**{table_name}**")
+        st.dataframe(df, hide_index=True, use_container_width=True)
+
+st.divider()
+
+level = ss.selected_level
+info = _LEVEL_INFO[level]
+
+
+def render_question(problem: dict):
+    """1問分の出題・答え合わせ・解説を表示する（4択）。"""
+    total = len(ss.queue)
+    st.caption(
+        f"このラウンド：問題 {ss.pos + 1} / {total}　｜　項目: {problem['topic']}"
+    )
+    st.subheader("問題")
+    st.write(problem["question"])
+
+    # ヒント（構文の意味）。見なくても解けるよう、たたんで表示する。
+    if problem.get("hint"):
+        with st.expander("💡 ヒントを見る（構文の意味）"):
+            st.markdown(problem["hint"])
+
+    choices = problem["choices"]
+    labels = [chr(ord("A") + i) for i in range(len(choices))]
+
+    st.markdown("#### 選択肢（正しい SQL を1つ選んでください）")
+    for label, sql in zip(labels, choices):
+        st.markdown(f"**{label}**")
+        st.code(sql, language="sql")
+
+    # key にラウンド番号を含め、毎ラウンド・各問題でラジオを独立させる
+    radio_key = f"choice_{problem['id']}_{ss.round_id}"
+    st.radio("あなたの答え", labels, key=radio_key, horizontal=True)
+
+    if not ss.answered:
+        # まだ答え合わせ前：答え合わせボタンだけ出す
+        st.button(
+            "✅ 答え合わせ",
+            type="primary",
+            on_click=check_answer,
+            args=(problem, radio_key),
+        )
+    else:
+        # 答え合わせ後：結果と解説、次へボタン
+        correct_label = labels[problem["answer_index"]]
+        if ss.last_correct:
+            st.success(f"正解！　答えは {correct_label} です。")
+        else:
+            st.error(f"不正解…　正解は {correct_label} です。")
+
+        st.markdown("#### ✅ 正解の SQL（MySQL）")
+        st.code(problem["answer_sql"], language="sql")
+        st.markdown("#### 📖 解説")
+        st.write(problem["explanation"])
+        if problem.get("points"):
+            st.markdown("#### 💡 ポイント / よくある間違い")
+            st.info(problem["points"])
+
+        is_last = ss.pos >= len(ss.queue) - 1
+        st.button(
+            "結果を見る →" if is_last else "次の問題 →",
+            type="primary",
+            on_click=go_next,
+        )
+
+
+def render_result():
+    """ラウンド終了後の結果画面。"""
+    lv = ss.round_level
+    total = len(problems_for_level(lv))
+    wrong = ss.wrong
+
+    st.header(f"Lv{lv} {_LEVEL_INFO[lv]['title']}　結果")
+
+    score = ss.level_score.get(lv)
+    if score is not None:
+        correct, score_total = score
+        st.metric("このレベルの点数（初回）", f"{correct} / {score_total} 点")
+
+    if not wrong:
+        # --- 合格 ---
+        ss.passed.add(lv)
+        if lv < MAX_LEVEL:
+            ss.unlocked = max(ss.unlocked, lv + 1)
+
+        st.success(f"🎉 全問正解！ Lv{lv} は【合格】です。")
+        st.balloons()
+
+        if lv < MAX_LEVEL:
+            next_info = _LEVEL_INFO[lv + 1]
+            st.write(f"次は **Lv{lv + 1}（{next_info['title']}）** が解放されました。")
+            st.button(
+                f"Lv{lv + 1} へ進む →",
+                type="primary",
+                on_click=select_level,
+                args=(lv + 1,),
+            )
+        else:
+            st.success("🏆 全5レベルを制覇しました！おめでとうございます！")
+    else:
+        # --- まだ間違いが残っている ---
+        st.warning(f"あと {len(wrong)} 問。間違えた問題をもう一度解いて、全問正解を目指しましょう。")
+        st.markdown("#### ❌ 間違えた問題")
+        for pid in sorted(wrong):
+            st.write(f"・{_BY_ID[pid]['question']}")
+
+        st.button(
+            "間違えた問題をもう一度 🔁",
+            type="primary",
+            on_click=start_round,
+            args=(lv, sorted(wrong), False),
+        )
+
+    st.divider()
+    st.button(
+        "このレベルを最初からやり直す",
+        on_click=select_level,
+        args=(lv,),
+    )
+
+
+# --- 画面の出し分け ----------------------------------------------------------
+if ss.active:
+    # 攻略中：いまの問題を出す
+    render_question(_BY_ID[ss.queue[ss.pos]])
+elif ss.finished:
+    # 結果画面
+    render_result()
+else:
+    # スタート画面
+    n = len(problems_for_level(level))
+    st.header(f"Lv{level}　{info['title']}")
+    st.write(info["desc"])
+    st.caption(f"問題数：{n} 問　／　全問正解で合格です。")
+    if level in ss.passed:
+        st.success("このレベルは合格済みです。もう一度挑戦することもできます。")
+    st.button(
+        "▶️ スタート",
+        type="primary",
+        on_click=start_round,
+        args=(level, [p["id"] for p in problems_for_level(level)], True),
+    )
