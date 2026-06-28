@@ -11,6 +11,9 @@
     - 合格すると次のレベルが解放される（まだ解いていない先のレベルはロック）。
 """
 
+import json
+import os
+
 import streamlit as st
 
 import schema
@@ -22,10 +25,33 @@ MAX_LEVEL = len(LEVELS)                        # 5
 _BY_ID = {p["id"]: p for p in PROBLEMS}        # id から問題を引く辞書
 _LEVEL_INFO = {d["level"]: d for d in LEVELS}  # level から {title, desc} を引く
 
+# 進捗の自動保存はブラウザの localStorage に行う（ユーザーごとに保存される）。
+# ブラウザが無い自動テスト時は SQLQUIZ_NO_STORAGE=1 で無効化して使う。
+STORAGE_ENABLED = os.environ.get("SQLQUIZ_NO_STORAGE") != "1"
+PROGRESS_KEY = "sqlquiz_progress"
+
 
 def problems_for_level(level: int):
     """その level の問題を id 順で返す。"""
     return [p for p in PROBLEMS if p["level"] == level]
+
+
+# --- 進捗の保存／復元用（純関数なので単体テストしやすい）-----------------------
+def serialize_progress(unlocked, passed, level_score) -> dict:
+    """保存する進捗（解放レベル・合格・点数）を JSON 化できる dict にする。"""
+    return {
+        "unlocked": int(unlocked),
+        "passed": sorted(int(x) for x in passed),
+        "level_score": {str(k): list(v) for k, v in level_score.items()},
+    }
+
+
+def deserialize_progress(data: dict):
+    """保存された dict から (unlocked, passed:set, level_score:dict) を復元する。"""
+    unlocked = int(data.get("unlocked", 1))
+    passed = set(int(x) for x in data.get("passed", []))
+    level_score = {int(k): tuple(v) for k, v in data.get("level_score", {}).items()}
+    return unlocked, passed, level_score
 
 
 # =============================================================================
@@ -54,6 +80,40 @@ for key, value in DEFAULTS.items():
         st.session_state[key] = value
 
 ss = st.session_state
+
+# --- ブラウザに保存した進捗を読み込む（セッションで1回だけ）-------------------
+localS = None
+if STORAGE_ENABLED:
+    from streamlit_local_storage import LocalStorage
+
+    localS = LocalStorage()
+    if not ss.get("_loaded_from_storage"):
+        raw = localS.getItem(PROGRESS_KEY)
+        if raw:
+            try:
+                data = raw if isinstance(raw, dict) else json.loads(raw)
+                ss.unlocked, ss.passed, ss.level_score = deserialize_progress(data)
+            except Exception:
+                pass  # 壊れたデータは無視して最初から
+        # 直後の無駄な再保存を防ぐため、現在値を「保存済み」として記録
+        ss["_saved_payload"] = json.dumps(
+            serialize_progress(ss.unlocked, ss.passed, ss.level_score),
+            ensure_ascii=False,
+        )
+        ss["_loaded_from_storage"] = True
+
+
+def save_progress():
+    """進捗が変わっていればブラウザに保存する。"""
+    if not (STORAGE_ENABLED and localS is not None):
+        return
+    payload = json.dumps(
+        serialize_progress(ss.unlocked, ss.passed, ss.level_score),
+        ensure_ascii=False,
+    )
+    if ss.get("_saved_payload") != payload:
+        localS.setItem(PROGRESS_KEY, payload, key="sqlquiz_save")
+        ss["_saved_payload"] = payload
 
 
 # =============================================================================
@@ -326,3 +386,7 @@ else:
         on_click=start_round,
         args=(level, [p["id"] for p in problems_for_level(level)], True),
     )
+
+
+# --- 進捗の自動保存（この実行で進捗が変わっていればブラウザに保存）-------------
+save_progress()
