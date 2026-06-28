@@ -299,6 +299,14 @@ st.sidebar.title("🗃️ SQL 問題集")
 st.sidebar.caption("MySQL の書き方で学ぶ・Lv1〜Lv5")
 
 st.sidebar.subheader("レベルを選ぶ")
+# レベルボタンのラベルを左寄せにする（Streamlit の既定は中央寄せ）。
+st.sidebar.markdown(
+    "<style>"
+    '[data-testid="stSidebar"] .stButton button { justify-content: flex-start; '
+    "text-align: left; }"
+    "</style>",
+    unsafe_allow_html=True,
+)
 for info in LEVELS:
     lv = info["level"]
     n = len(problems_for_level(lv))
