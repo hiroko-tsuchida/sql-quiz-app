@@ -15,6 +15,7 @@ import json
 import os
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 import schema
 from problems import LEVELS, PROBLEMS
@@ -109,6 +110,7 @@ DEFAULTS = {
     "is_first_round": True,  # 初回ラウンド（点数を記録する）か
     "first_correct": 0,   # 初回ラウンドの正解数
     "round_id": 0,        # ラジオの key を毎ラウンド変えるための通し番号
+    "ended": False,       # 「今日はここまで」で終了画面を表示中か
 }
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
@@ -209,6 +211,33 @@ def reset_progress():
         ss[key] = type(value)() if isinstance(value, (set, list, dict)) else value
 
 
+def end_session():
+    """「今日はここまで」ボタン。終了画面へ（保存は本体側で行う）。"""
+    ss.ended = True
+
+
+def resume_session():
+    """終了画面から戻る。"""
+    ss.ended = False
+
+
+# =============================================================================
+# 「今日はここまで」終了画面（保存してタブを閉じる）
+# =============================================================================
+if ss.ended:
+    save_progress()  # ここまでの進捗を確実に保存
+    st.title("👋 今日はここまで")
+    st.success("進捗を保存しました。続きはまたいつでも、途中の問題から再開できます。")
+    st.caption("このタブを自動で閉じようとします。閉じない場合は手動で閉じてください。")
+    # ブラウザによっては window.close() が無視されます（その場合は上の案内のとおり手動で）。
+    components.html(
+        "<script>setTimeout(function(){window.open('','_self');window.close();}, 400);</script>",
+        height=0,
+    )
+    st.button("◀ 戻って続ける", on_click=resume_session)
+    st.stop()
+
+
 # =============================================================================
 # サイドバー：レベル選択と進捗
 # =============================================================================
@@ -255,6 +284,12 @@ for info in LEVELS:
 
 st.sidebar.divider()
 st.sidebar.metric("合格したレベル", f"{len(ss.passed)} / {MAX_LEVEL}")
+st.sidebar.button(
+    "🌙 今日はここまで（保存して終了）",
+    type="primary",
+    use_container_width=True,
+    on_click=end_session,
+)
 st.sidebar.button("進捗をリセット", on_click=reset_progress)
 
 
