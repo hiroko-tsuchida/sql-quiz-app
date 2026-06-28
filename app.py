@@ -12,6 +12,7 @@
 
 import json
 import os
+import random
 
 import altair as alt
 import pandas as pd
@@ -300,11 +301,27 @@ st.sidebar.caption("MySQL の書き方で学ぶ・Lv1〜Lv12")
 
 st.sidebar.subheader("レベルを選ぶ")
 # レベルボタンのラベルを左寄せにする（Streamlit の既定は中央寄せ）。
+# ボタン本体・内側のラッパー・テキスト(p)すべてに効かせて確実に左寄せする。
 st.sidebar.markdown(
-    "<style>"
-    '[data-testid="stSidebar"] .stButton button { justify-content: flex-start; '
-    "text-align: left; }"
-    "</style>",
+    """
+    <style>
+    [data-testid="stSidebar"] .stButton button {
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+    [data-testid="stSidebar"] .stButton button > div,
+    [data-testid="stSidebar"] .stButton button [data-testid="stMarkdownContainer"] {
+        justify-content: flex-start !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+    [data-testid="stSidebar"] .stButton button p {
+        text-align: left !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 for info in LEVELS:
@@ -346,7 +363,12 @@ st.sidebar.button("進捗をリセット", on_click=reset_progress)
 # =============================================================================
 # メイン画面
 # =============================================================================
-st.title("SQL 問題集（MySQL）")
+# 見出し。通常の st.title（約2.75rem）の半分くらいの大きさにする。
+st.markdown(
+    "<h1 style='font-size: 1.375rem; font-weight: 700; margin: 0 0 0.5rem 0;'>"
+    "SQL 問題集（MySQL）</h1>",
+    unsafe_allow_html=True,
+)
 
 # --- テーブル定義とサンプルデータ（折りたたみ）-------------------------------
 with st.expander("📋 テーブル定義とサンプルデータを見る", expanded=False):
@@ -368,8 +390,13 @@ def render_question(problem: dict):
     st.caption(
         f"このラウンド：問題 {ss.pos + 1} / {total}　｜　項目: {problem['topic']}"
     )
-    st.subheader("問題")
-    st.write(problem["question"])
+    st.subheader(f"問題 {ss.pos + 1}")
+    # 問題文は本文より一段大きめ（約1rem → 1.2rem）にして読みやすくする。
+    st.markdown(
+        f"<p style='font-size: 1.2rem; line-height: 1.7; margin: 0 0 0.5rem 0;'>"
+        f"{problem['question']}</p>",
+        unsafe_allow_html=True,
+    )
 
     # ヒント（構文の意味）。見なくても解けるよう、たたんで表示する。
     if problem.get("hint"):
@@ -379,7 +406,12 @@ def render_question(problem: dict):
     choices, correct_index = three_choices(problem)
     labels = [chr(ord("A") + i) for i in range(len(choices))]
 
-    st.markdown("#### 選択肢（正しい SQL を1つ選んでください）")
+    # 「選択肢…」の見出し。通常の #### (h4 約1.5rem) の半分くらいの大きさにする。
+    st.markdown(
+        "<h4 style='font-size: 0.75rem; font-weight: 700; margin: 0.5rem 0 0.25rem 0;'>"
+        "選択肢（正しい SQL を1つ選んでください）</h4>",
+        unsafe_allow_html=True,
+    )
     for label, sql in zip(labels, choices):
         st.markdown(f"**{label}**")
         st.code(sql, language="sql")
@@ -449,16 +481,31 @@ def render_result():
             ss.unlocked = max(ss.unlocked, lv + 1)
 
         st.success(f"🎉 全問正解！ Lv{lv} は【合格】です。")
-        # 風船の上昇アニメを半分の速さに（標準は 750ms → 1500ms に上書き）。
-        # Streamlit の風船は data-testid="stBalloons" の中の img をインラインで
-        # animationDuration:750ms にしているため、!important で上書きする。
+        # お祝い演出：カラフルな花がひらひら降ってくるアニメ（CSS のみ）。
+        # たくさんの花の絵文字を、横位置・大きさ・落ちる速さ・開始時間を
+        # ばらばらにして降らせる。
+        _flowers = ["🌸", "🌺", "🌻", "🌷", "🌹", "💐", "🏵️", "🌼", "🌸", "🏵️"]
+        _petals = "".join(
+            f"<span class='flower' style='"
+            f"left:{random.uniform(0, 100):.1f}%;"
+            f"font-size:{random.uniform(1.2, 2.6):.2f}rem;"
+            f"animation-delay:{random.uniform(0, 1.2):.2f}s;"
+            f"animation-duration:{random.uniform(2.6, 4.6):.2f}s;'>"
+            f"{random.choice(_flowers)}</span>"
+            for _ in range(45)
+        )
         st.markdown(
             "<style>"
-            '[data-testid="stBalloons"] img { animation-duration: 1500ms !important; }'
-            "</style>",
+            "@keyframes flowerfall{"
+            "0%{transform:translateY(-12vh) rotate(0deg);opacity:1;}"
+            "100%{transform:translateY(112vh) rotate(540deg);opacity:.9;}}"
+            ".flower{position:fixed;top:0;z-index:9999;pointer-events:none;"
+            "animation-name:flowerfall;animation-timing-function:linear;"
+            "animation-iteration-count:1;will-change:transform;}"
+            "</style>"
+            f"<div aria-hidden='true'>{_petals}</div>",
             unsafe_allow_html=True,
         )
-        st.balloons()
 
         if lv < MAX_LEVEL:
             next_info = _LEVEL_INFO[lv + 1]
