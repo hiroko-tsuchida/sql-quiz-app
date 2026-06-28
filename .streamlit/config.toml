@@ -1,0 +1,5 @@
+# アプリのテーマ設定。
+# primaryColor が「主役ボタン（type="primary"）」の色になる。
+# 標準は赤(#FF4B4B)できついので、落ち着いた緑にする。
+[theme]
+primaryColor = "#2E7D32"
