@@ -17,6 +17,7 @@
 # 項目（トピック）の並び順。アプリのメニューでこの順に出します。
 TOPICS = [
     "SELECT と WHERE",
+    "基本文法",
     "並び替え・重複除去",
     "集計関数と GROUP BY",
     "テーブル結合（JOIN）",
@@ -956,6 +957,102 @@ PROBLEMS = [
         "points": (
             "・SQL の『等しい』は `=` です。プログラミング言語のような `==` は使いません。\n"
             "・行を絞り込むキーワードは `IF` ではなく `WHERE` です。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv2 用の「基本文法」（AS 別名・BETWEEN・IN）
+    # =====================================================================
+    {
+        "id": 28,
+        "hint": (
+            "- `列 AS 別名` … 列に表示用の名前（見出し）をつける\n"
+            "- 見た目が変わるだけで、データそのものは変わらない"
+        ),
+        "topic": "基本文法",
+        "level": 2,
+        "question": "社員の名前と月給を表示してください。"
+                    "ただし、月給（salary）の列の見出しを『給料』にしてください。",
+        "answer_sql": "SELECT name, salary AS 給料\nFROM employees;",
+        "choices": [
+            "SELECT name, salary AS 給料\nFROM employees;",
+            "SELECT name, 給料 AS salary\nFROM employees;",
+            "SELECT name, salary = 給料\nFROM employees;",
+            "SELECT name, salary TO 給料\nFROM employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "列に別の見出し（別名）を付けるには `AS` を使います。\n\n"
+            "・`salary AS 給料` … salary 列を『給料』という見出しで表示します。\n"
+            "・順番は『元の列 AS 新しい見出し』です。逆にしてはいけません。\n\n"
+            "見出しが変わるだけで、中身のデータは変わりません。"
+        ),
+        "points": (
+            "・`AS` の後ろが新しい見出しです。『元の列 AS 別名』の順番に注意。\n"
+            "・MySQL では `AS` を省いて `salary 給料` とも書けますが、付けた方が読みやすいです。"
+        ),
+    },
+    {
+        "id": 29,
+        "hint": (
+            "- `列 BETWEEN A AND B` … A以上B以下（両端を含む）\n"
+            "- 小さい方 AND 大きい方 の順で書く"
+        ),
+        "topic": "基本文法",
+        "level": 2,
+        "question": "月給が 30万円以上 40万円以下 の社員の、名前と月給を表示してください。",
+        "answer_sql": (
+            "SELECT name, salary\n"
+            "FROM employees\n"
+            "WHERE salary BETWEEN 300000 AND 400000;"
+        ),
+        "choices": [
+            "SELECT name, salary\nFROM employees\nWHERE salary BETWEEN 300000 AND 400000;",
+            "SELECT name, salary\nFROM employees\nWHERE salary BETWEEN 400000 AND 300000;",
+            "SELECT name, salary\nFROM employees\nWHERE salary IN 300000 AND 400000;",
+            "SELECT name, salary\nFROM employees\nWHERE salary >= 300000 OR salary <= 400000;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『◯◯以上△△以下』のような範囲は `BETWEEN A AND B` で書けます。\n\n"
+            "・`salary BETWEEN 300000 AND 400000` … 30万以上40万以下（両端を含む）。\n"
+            "・これは `salary >= 300000 AND salary <= 400000` と同じ意味です。\n\n"
+            "書く順番は『小さい方 AND 大きい方』です。"
+        ),
+        "points": (
+            "・`BETWEEN` は両端（30万と40万ちょうど）も含みます。\n"
+            "・小さい方→大きい方の順で書くこと。逆にすると1件も取れません。"
+        ),
+    },
+    {
+        "id": 30,
+        "hint": (
+            "- `列 IN (値1, 値2, ...)` … どれかに一致\n"
+            "- `OR` をいくつも書く代わりに短く書ける"
+        ),
+        "topic": "基本文法",
+        "level": 2,
+        "question": "部署ID（department_id）が 1 または 3 の社員の、名前と部署IDを表示してください。",
+        "answer_sql": (
+            "SELECT name, department_id\n"
+            "FROM employees\n"
+            "WHERE department_id IN (1, 3);"
+        ),
+        "choices": [
+            "SELECT name, department_id\nFROM employees\nWHERE department_id IN (1, 3);",
+            "SELECT name, department_id\nFROM employees\nWHERE department_id = 1 OR 3;",
+            "SELECT name, department_id\nFROM employees\nWHERE department_id IN (1 AND 3);",
+            "SELECT name, department_id\nFROM employees\nWHERE department_id = (1, 3);",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『どれかに一致』を調べるときは `IN (値の一覧)` が便利です。\n\n"
+            "・`department_id IN (1, 3)` … 部署IDが 1 か 3 の人を残します。\n"
+            "・これは `department_id = 1 OR department_id = 3` と同じ意味で、短く書けます。"
+        ),
+        "points": (
+            "・`= 1 OR 3` は誤りです（『3』が常に真のように扱われ、正しく絞れません）。\n"
+            "・候補は `IN (1, 3)` のようにカンマで並べます。"
         ),
     },
 ]
