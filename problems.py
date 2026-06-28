@@ -17,6 +17,7 @@
 # 項目（トピック）の並び順。アプリのメニューでこの順に出します。
 TOPICS = [
     "SELECT と WHERE",
+    "データ操作（INSERT/UPDATE/DELETE）",
     "並び替え・重複除去",
     "集計関数と GROUP BY",
     "テーブル結合（JOIN）",
@@ -26,14 +27,21 @@ TOPICS = [
     "ウィンドウ関数",
 ]
 
-# レベル（攻略の段階）。やさしい順に Lv1〜Lv5。
-# 各問題の "level" がこの番号に対応します。アプリは Lv1 から順に攻略します。
+# レベル（攻略の段階）。やさしい順に Lv1〜Lv12。
+# 各問題の "level" がこの番号に対応します。どのレベルからでも挑戦できます。
 LEVELS = [
-    {"level": 1, "title": "はじめの一歩", "desc": "SELECT と WHERE の基本（まずはここから）"},
-    {"level": 2, "title": "並び替え・絞り込み", "desc": "ORDER BY・DISTINCT・LIMIT・複数条件"},
-    {"level": 3, "title": "集計（GROUP BY）", "desc": "COUNT/AVG・GROUP BY・HAVING・CASE 入門"},
-    {"level": 4, "title": "結合と条件分岐", "desc": "JOIN・複数テーブル・CASE の応用"},
-    {"level": 5, "title": "サブクエリとウィンドウ関数", "desc": "上級。サブクエリ・RANK などの総仕上げ"},
+    {"level": 1,  "title": "SELECT の基本", "desc": "全部のデータを取り出す・列を選ぶ・* の使い方"},
+    {"level": 2,  "title": "列の選び方と計算", "desc": "別の表・列の順番・別名(AS)・計算した列"},
+    {"level": 3,  "title": "WHERE で絞り込む", "desc": "条件で行を選ぶ・比較・NULL / NOT NULL"},
+    {"level": 4,  "title": "いろいろな条件①", "desc": "文字列・以下(<=)・等しくない(<>)・IN"},
+    {"level": 5,  "title": "いろいろな条件②", "desc": "AND/OR・LIKE・BETWEEN の組み合わせ"},
+    {"level": 6,  "title": "データの追加・更新・削除", "desc": "INSERT / UPDATE / DELETE（データ操作の基本）"},
+    {"level": 7,  "title": "並び替えと重複", "desc": "ORDER BY（昇順/降順）・DISTINCT・LIMIT"},
+    {"level": 8,  "title": "集計（GROUP BY）", "desc": "COUNT/SUM/AVG/MAX・GROUP BY・HAVING"},
+    {"level": 9,  "title": "CASE と関数", "desc": "CASE 式・条件分岐・日付のしぼり込み"},
+    {"level": 10, "title": "テーブル結合（JOIN）", "desc": "複数の表をつなぐ・名前（部署名）の組み立て"},
+    {"level": 11, "title": "サブクエリ", "desc": "クエリの中にクエリ・段階的な絞り込み"},
+    {"level": 12, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
 ]
 
 
@@ -48,7 +56,7 @@ PROBLEMS = [
             "- `>=` は「以上」。ちょうどの値も含みます"
         ),
         "topic": "SELECT と WHERE",
-        "level": 1,
+        "level": 3,
         "question": "社員（employees）の中から、月給（salary）が 30万円以上の人の "
                     "名前（name）と月給（salary）を取り出してください。",
         "answer_sql": "SELECT name, salary\nFROM employees\nWHERE salary >= 300000;",
@@ -78,7 +86,7 @@ PROBLEMS = [
             "- `OR` なら「どちらか一方」でOK"
         ),
         "topic": "SELECT と WHERE",
-        "level": 2,
+        "level": 5,
         "question": "営業部（department_id が 1）に所属し、かつ月給が 30万円以上の社員の "
                     "名前と月給を取り出してください。",
         "answer_sql": (
@@ -112,7 +120,7 @@ PROBLEMS = [
             "- 空かどうかは `=` ではなく `IS NULL` で調べる"
         ),
         "topic": "SELECT と WHERE",
-        "level": 1,
+        "level": 3,
         "question": "上司がいない社員（manager_id が空っぽ＝NULL の人）の名前を取り出してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE manager_id IS NULL;",
         "choices": [
@@ -145,7 +153,7 @@ PROBLEMS = [
             "- `DESC`=大きい順、`ASC`（省略時）=小さい順"
         ),
         "topic": "並び替え・重複除去",
-        "level": 2,
+        "level": 7,
         "question": "社員を月給の高い順に並べて、名前と月給を表示してください。",
         "answer_sql": "SELECT name, salary\nFROM employees\nORDER BY salary DESC;",
         "choices": [
@@ -173,7 +181,7 @@ PROBLEMS = [
             "- 書く場所は `SELECT` のすぐ後ろ"
         ),
         "topic": "並び替え・重複除去",
-        "level": 2,
+        "level": 7,
         "question": "商品（products）にどんなカテゴリ（category）があるか、"
                     "重複をなくして一覧で取り出してください。",
         "answer_sql": "SELECT DISTINCT category\nFROM products;",
@@ -202,7 +210,7 @@ PROBLEMS = [
             "- 「上位◯件」は並び替え＋件数しぼりのセット"
         ),
         "topic": "並び替え・重複除去",
-        "level": 2,
+        "level": 7,
         "question": "月給が高い人トップ3の、名前と月給を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -239,7 +247,7 @@ PROBLEMS = [
             "- `*` は「すべての行」"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 3,
+        "level": 8,
         "question": "社員が全部で何人いるか、人数を数えてください。",
         "answer_sql": "SELECT COUNT(*) AS 人数\nFROM employees;",
         "choices": [
@@ -267,7 +275,7 @@ PROBLEMS = [
             "- `AVG`=平均（`SUM`=合計, `MAX`/`MIN`=最大/最小）"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 3,
+        "level": 8,
         "question": "部署（department_id）ごとに、平均の月給を求めてください。",
         "answer_sql": (
             "SELECT department_id, AVG(salary) AS 平均給料\n"
@@ -299,7 +307,7 @@ PROBLEMS = [
             "- `WHERE` はまとめる「前」の1行ずつにかける"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 3,
+        "level": 8,
         "question": "社員が 2人以上いる部署について、部署IDとその人数を表示してください。",
         "answer_sql": (
             "SELECT department_id, COUNT(*) AS 人数\n"
@@ -337,7 +345,7 @@ PROBLEMS = [
             "- `ON A = B` でどの列どうしを一致させるか指定"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 4,
+        "level": 10,
         "question": "社員の名前と、その人が所属する部署の名前を、いっしょに表示してください。",
         "answer_sql": (
             "SELECT employees.name, departments.name AS 部署名\n"
@@ -373,7 +381,7 @@ PROBLEMS = [
             "- `COUNT(列名)` は NULL を数えない（0人を正しく出せる）"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 4,
+        "level": 10,
         "question": "すべての部署について、部署名とその部署の社員数を表示してください。"
                     "社員が1人もいない部署も、0人として表示してください。",
         "answer_sql": (
@@ -409,7 +417,7 @@ PROBLEMS = [
             "- つなぐたびに `ON` で一致条件を指定する"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 4,
+        "level": 10,
         "question": "注文（orders）について、『担当した社員の名前』『商品名』『数量』を"
                     "一覧で表示してください。",
         "answer_sql": (
@@ -447,7 +455,7 @@ PROBLEMS = [
             "- 1つの値を返すサブクエリは `>` などで比較できる"
         ),
         "topic": "サブクエリ",
-        "level": 5,
+        "level": 11,
         "question": "全社員の平均月給よりも高い月給をもらっている社員の、名前と月給を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -480,7 +488,7 @@ PROBLEMS = [
             "- `NOT IN (...)` … 一覧の「どれにも一致しない」"
         ),
         "topic": "サブクエリ",
-        "level": 5,
+        "level": 11,
         "question": "一度も注文（orders）を担当していない社員の名前を表示してください。",
         "answer_sql": (
             "SELECT name\n"
@@ -513,7 +521,7 @@ PROBLEMS = [
             "- `department_id = e.department_id` で「同じ部署内」を指す"
         ),
         "topic": "サブクエリ",
-        "level": 5,
+        "level": 11,
         "question": "各部署で最も月給が高い社員について、部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT e.department_id, e.name, e.salary\n"
@@ -555,7 +563,7 @@ PROBLEMS = [
             "- `%` は「任意の文字0個以上」。`'%藤%'` で藤を含む"
         ),
         "topic": "文字列・日付の関数",
-        "level": 2,
+        "level": 5,
         "question": "名前に『藤』という文字が含まれる社員を、すべて表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE name LIKE '%藤%';",
         "choices": [
@@ -583,7 +591,7 @@ PROBLEMS = [
             "- `>=` で「その日以降」"
         ),
         "topic": "文字列・日付の関数",
-        "level": 3,
+        "level": 9,
         "question": "2020年以降に入社した（hire_date が 2020年1月1日以降の）社員の、"
                     "名前と入社日を表示してください。",
         "answer_sql": (
@@ -616,7 +624,7 @@ PROBLEMS = [
             "- MySQL では `+` で文字はつなげない（`+` は計算になる）"
         ),
         "topic": "文字列・日付の関数",
-        "level": 4,
+        "level": 10,
         "question": "社員一覧を『佐藤（営業）』のように『名前（部署名）』の形にまとめた1つの列で"
                     "表示してください。",
         "answer_sql": (
@@ -655,7 +663,7 @@ PROBLEMS = [
             "- 最後は必ず `END` で閉じる"
         ),
         "topic": "CASE 式と条件分岐",
-        "level": 3,
+        "level": 9,
         "question": "社員の名前と月給に加えて、月給が40万円以上なら『高い』、"
                     "そうでなければ『普通』と表示する列を作ってください。",
         "answer_sql": (
@@ -691,7 +699,7 @@ PROBLEMS = [
             "- 条件は「大きい方から」書くと重なりを防げる"
         ),
         "topic": "CASE 式と条件分岐",
-        "level": 4,
+        "level": 9,
         "question": "社員の名前と月給に加えて、月給を『40万以上=A』『30万以上=B』"
                     "『それ未満=C』の3段階で表示する列を作ってください。",
         "answer_sql": (
@@ -729,7 +737,7 @@ PROBLEMS = [
             "- 1と0に置き換えて合計＝「1の個数」"
         ),
         "topic": "CASE 式と条件分岐",
-        "level": 5,
+        "level": 9,
         "question": "部署ごとに、『月給が40万円以上の社員が何人いるか』を数えて、"
                     "部署IDと人数を表示してください。",
         "answer_sql": (
@@ -769,7 +777,7 @@ PROBLEMS = [
             "- `OVER(...)` の中で「どう並べるか」を指定"
         ),
         "topic": "ウィンドウ関数",
-        "level": 5,
+        "level": 12,
         "question": "全社員に、月給の高い順の順位（1位・2位…）を付けて、"
                     "名前・月給・順位を表示してください。",
         "answer_sql": (
@@ -803,7 +811,7 @@ PROBLEMS = [
             "- `ORDER BY` で各グループ内の並び順を決める"
         ),
         "topic": "ウィンドウ関数",
-        "level": 5,
+        "level": 12,
         "question": "部署ごとに、月給の高い順の順位を付けてください。"
                     "部署ID・名前・月給・部署内順位を表示してください。",
         "answer_sql": (
@@ -837,7 +845,7 @@ PROBLEMS = [
             "- `ROW_NUMBER()` は 1,2,3… の連番"
         ),
         "topic": "ウィンドウ関数",
-        "level": 5,
+        "level": 12,
         "question": "各部署で月給が最も高い社員（部署内1位）だけを取り出して、"
                     "部署ID・名前・月給を表示してください。",
         "answer_sql": (
@@ -937,7 +945,7 @@ PROBLEMS = [
             "- SQL の「等しい」は `=`（`==` ではない）。数値はクォート不要"
         ),
         "topic": "SELECT と WHERE",
-        "level": 1,
+        "level": 3,
         "question": "営業部（department_id が 1）に所属する社員の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE department_id = 1;",
         "choices": [
@@ -956,6 +964,626 @@ PROBLEMS = [
         "points": (
             "・SQL の『等しい』は `=` です。プログラミング言語のような `==` は使いません。\n"
             "・行を絞り込むキーワードは `IF` ではなく `WHERE` です。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv1（SELECT の基本）
+    # =====================================================================
+    {
+        "id": 28,
+        "hint": (
+            "- 取り出す列が複数あるときは、カンマ `,` で区切って並べる\n"
+            "- 書いた順に左から表示される"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 1,
+        "question": "商品（products）の名前（name）と単価（price）の2つの列を、"
+                    "すべての行について表示してください。",
+        "answer_sql": "SELECT name, price\nFROM products;",
+        "choices": [
+            "SELECT name, price\nFROM products;",
+            "SELECT name price\nFROM products;",
+            "SELECT name AND price\nFROM products;",
+            "SELECT name, price;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "複数の列を取り出すときは、列名をカンマ `,` で区切って並べます。\n\n"
+            "・`SELECT name, price` … 名前と単価の2つの列を取り出します。\n"
+            "・`FROM products` … 商品の表から取り出します。\n\n"
+            "書いた順（name → price）のとおり、左から並んで表示されます。"
+        ),
+        "points": (
+            "・列の区切りは『カンマ』です。スペースだけや `AND` ではつなげません。\n"
+            "・`AND` は WHERE の中で条件をつなぐ言葉で、列を並べる役目ではありません。"
+        ),
+    },
+    {
+        "id": 29,
+        "hint": (
+            "- `*` … すべての列、という意味\n"
+            "- 表は必ず `FROM 表名` で指定する"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 2,
+        "question": "部署（departments）の表について、すべての列・すべての行を表示してください。",
+        "answer_sql": "SELECT *\nFROM departments;",
+        "choices": [
+            "SELECT *\nFROM departments;",
+            "SELECT ALL\nFROM departments;",
+            "SELECT *\ndepartments;",
+            "SELECT departments;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『すべての列』を表示したいときは、列名を1つずつ書く代わりに `*`（アスタリスク）を使います。\n\n"
+            "・`SELECT *` … その表の全部の列、という意味です。\n"
+            "・`FROM departments` … 部署の表から取り出します。"
+        ),
+        "points": (
+            "・『全部の列』は `*` です。`ALL` ではありません。\n"
+            "・表を指定するときは必ず `FROM 表名` の形にします。"
+        ),
+    },
+    {
+        "id": 30,
+        "hint": (
+            "- `SELECT` のあとに書いた順番で、列が左から並ぶ\n"
+            "- 列の区切りはカンマ `,`"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 2,
+        "question": "社員（employees）の月給（salary）と名前（name）を、"
+                    "『月給 → 名前』の順番で、すべての行について表示してください。",
+        "answer_sql": "SELECT salary, name\nFROM employees;",
+        "choices": [
+            "SELECT salary, name\nFROM employees;",
+            "SELECT name, salary\nFROM employees;",
+            "SELECT salary name\nFROM employees;",
+            "SELECT salary, name;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "表示される列の順番は、`SELECT` のあとに書いた順番で決まります。\n\n"
+            "・`SELECT salary, name` … 月給・名前の順で表示されます。\n"
+            "・もし `name, salary` と書くと、名前・月給の順になってしまいます。"
+        ),
+        "points": (
+            "・列の並び順は『書いた順』。指定された順番どおりに書きましょう。\n"
+            "・列の区切りはカンマです（`salary name` のようにスペースだけではダメ）。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv2（WHERE で絞り込む）
+    # =====================================================================
+    {
+        "id": 31,
+        "hint": (
+            "- 文字（文字列）と比べるときは、値を `' '`（シングルクォート）で囲む\n"
+            "- 数値はクォート不要だが、文字は必要"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 4,
+        "question": "商品（products）の中から、カテゴリ（category）が「家具」の商品の "
+                    "名前（name）を表示してください。",
+        "answer_sql": "SELECT name\nFROM products\nWHERE category = '家具';",
+        "choices": [
+            "SELECT name\nFROM products\nWHERE category = '家具';",
+            "SELECT name\nFROM products\nWHERE category = 家具;",
+            "SELECT name\nFROM products\nWHERE name = '家具';",
+            "SELECT name\nFROM products\nHAVING category = '家具';",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "文字（文字列）で絞り込むときは、比べる値を `' '`（シングルクォート）で囲みます。\n\n"
+            "・`WHERE category = '家具'` … カテゴリが『家具』の行だけを残します。\n\n"
+            "数値（たとえば 1）はクォートなしで書きますが、文字はクォートで囲むのが決まりです。"
+        ),
+        "points": (
+            "・文字をクォートで囲み忘れると、SQL は『家具』を列の名前だと勘違いしてエラーになります。\n"
+            "・行をしぼり込むのは `WHERE`。`HAVING` は集計（GROUP BY）と一緒に使うものです。"
+        ),
+    },
+    {
+        "id": 32,
+        "hint": (
+            "- `<=` は「以下」。ちょうどの値も含む\n"
+            "- 不等号は `<=` の順で書く（`=<` とは書かない）"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 4,
+        "question": "商品（products）の中から、単価（price）が 2500円以下の商品の "
+                    "名前（name）と単価（price）を表示してください。",
+        "answer_sql": "SELECT name, price\nFROM products\nWHERE price <= 2500;",
+        "choices": [
+            "SELECT name, price\nFROM products\nWHERE price <= 2500;",
+            "SELECT name, price\nFROM products\nWHERE price < 2500;",
+            "SELECT name, price\nFROM products\nWHERE price =< 2500;",
+            "SELECT name, price\nFROM products\nWHERE price >= 2500;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『◯◯以下』は `<=` で表します。`<=` は『その値も含めて、それより小さい』という意味です。\n\n"
+            "・`WHERE price <= 2500` … 単価が 2500円ちょうど、または それより安い商品が残ります。\n\n"
+            "もし `<`（小なり）だけだと、2500円ちょうどの商品が外れてしまいます。"
+        ),
+        "points": (
+            "・『以下』は `<=`、『より小さい（その値は含まない）』は `<`。ちょうどを含むかで使い分けます。\n"
+            "・不等号は `<=` の順で書きます。`=<` と書くとエラーになります。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv3（条件の組み合わせ）
+    # =====================================================================
+    {
+        "id": 33,
+        "hint": (
+            "- `OR` … 2つの条件の「どちらか一方」を満たせばよい\n"
+            "- 両方を満たす必要があるときは `AND`"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 5,
+        "question": "営業部（department_id が 1）に所属している、または 月給（salary）が "
+                    "40万円以上の社員の、名前（name）を表示してください。",
+        "answer_sql": (
+            "SELECT name\n"
+            "FROM employees\n"
+            "WHERE department_id = 1\n"
+            "  OR salary >= 400000;"
+        ),
+        "choices": [
+            "SELECT name\nFROM employees\nWHERE department_id = 1\n  OR salary >= 400000;",
+            "SELECT name\nFROM employees\nWHERE department_id = 1\n  AND salary >= 400000;",
+            "SELECT name\nFROM employees\nWHERE department_id = 1, salary >= 400000;",
+            "SELECT name\nFROM employees\nWHERE department_id = 1\n  OR salary => 400000;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『どちらか一方を満たせばよい』ときは、条件を `OR` でつなぎます。\n\n"
+            "・`department_id = 1` … 営業部\n"
+            "・`salary >= 400000` … 月給40万円以上\n\n"
+            "この2つを `OR` で結ぶと、『営業部の人』と『40万円以上の人』の両方が残ります。"
+        ),
+        "points": (
+            "・『両方とも満たす』なら `AND`、『どちらか一方でよい』なら `OR` を使います。\n"
+            "・条件はカンマ `,` ではつなげません。`AND` か `OR` を使います。"
+        ),
+    },
+    {
+        "id": 34,
+        "hint": (
+            "- 「等しくない」は `<>` で表す（MySQL では `!=` も同じ）\n"
+            "- 文字と比べるので値は `' '` で囲む"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 4,
+        "question": "商品（products）の中から、カテゴリ（category）が「文具」でない商品の "
+                    "名前（name）とカテゴリ（category）を表示してください。",
+        "answer_sql": "SELECT name, category\nFROM products\nWHERE category <> '文具';",
+        "choices": [
+            "SELECT name, category\nFROM products\nWHERE category <> '文具';",
+            "SELECT name, category\nFROM products\nWHERE category = '文具';",
+            "SELECT name, category\nFROM products\nWHERE category NOT '文具';",
+            "SELECT name, category\nFROM products\nWHERE NOT category = 文具;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『◯◯でない（等しくない）』は `<>` で表します。\n\n"
+            "・`WHERE category <> '文具'` … カテゴリが『文具』以外の行だけを残します。\n\n"
+            "文字と比べるので、値は `' '`（シングルクォート）で囲みます。"
+        ),
+        "points": (
+            "・『等しくない』は `<>` です。MySQL では `!=` も同じ意味で使えます。\n"
+            "・`category NOT '文具'` のような書き方はできません。否定は `<>`（または `!=`）です。"
+        ),
+    },
+    {
+        "id": 35,
+        "hint": (
+            "- `BETWEEN A AND B` … 「A以上 B以下」の範囲（A と B も含む）\n"
+            "- 範囲のときは `>=` と `<=` を2つ書くかわりに使える"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 5,
+        "question": "商品（products）の中から、単価（price）が 1000円以上 30000円以下の商品の "
+                    "名前（name）と単価（price）を表示してください。",
+        "answer_sql": (
+            "SELECT name, price\n"
+            "FROM products\n"
+            "WHERE price BETWEEN 1000 AND 30000;"
+        ),
+        "choices": [
+            "SELECT name, price\nFROM products\nWHERE price BETWEEN 1000 AND 30000;",
+            "SELECT name, price\nFROM products\nWHERE price BETWEEN 1000 OR 30000;",
+            "SELECT name, price\nFROM products\nWHERE price IN (1000, 30000);",
+            "SELECT name, price\nFROM products\nWHERE price >= 1000 OR price <= 30000;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "ある範囲を指定するときは `BETWEEN A AND B` が便利です。"
+            "『A以上 B以下』を表し、A と B もその範囲に含みます。\n\n"
+            "・`price BETWEEN 1000 AND 30000` … 単価が 1000円〜30000円の商品が残ります。\n\n"
+            "これは `price >= 1000 AND price <= 30000` と同じ意味です。"
+        ),
+        "points": (
+            "・`BETWEEN` は必ず `AND` とセット（`OR` ではありません）。\n"
+            "・`IN (1000, 30000)` は『1000 か 30000 ちょうど』だけになり、範囲にはなりません。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv4（データの追加・更新・削除 / INSERT・UPDATE・DELETE）
+    # =====================================================================
+    {
+        "id": 36,
+        "hint": (
+            "- データの追加は `INSERT INTO 表名 (列...) VALUES (値...);`\n"
+            "- 文字は `' '` で囲み、数値はそのまま書く"
+        ),
+        "topic": "データ操作（INSERT/UPDATE/DELETE）",
+        "level": 6,
+        "question": "部署（departments）に、id が 5、name が「総務」の部署を1件追加してください。",
+        "answer_sql": "INSERT INTO departments (id, name)\nVALUES (5, '総務');",
+        "choices": [
+            "INSERT INTO departments (id, name)\nVALUES (5, '総務');",
+            "INSERT departments (id, name)\nVALUES (5, '総務');",
+            "INSERT INTO departments\nSET (5, '総務');",
+            "UPDATE departments\nSET id = 5, name = '総務';",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "データを1件追加するときは `INSERT INTO` を使います。\n\n"
+            "・`INSERT INTO departments (id, name)` … どの表の、どの列に入れるか。\n"
+            "・`VALUES (5, '総務')` … その列に入れる値。列の順番と値の順番をそろえます。\n\n"
+            "id は数値なのでそのまま、name は文字なので `' '` で囲みます。"
+        ),
+        "points": (
+            "・`INSERT` のあとには `INTO` が必要です。\n"
+            "・列のならびと VALUES のならびは、同じ順番にそろえます。"
+        ),
+    },
+    {
+        "id": 37,
+        "hint": (
+            "- データの変更は `UPDATE 表名 SET 列 = 値 WHERE 条件;`\n"
+            "- `WHERE` を付け忘れると、全部の行が変わってしまう"
+        ),
+        "topic": "データ操作（INSERT/UPDATE/DELETE）",
+        "level": 6,
+        "question": "社員（employees）のうち、id が 3 の人の月給（salary）を "
+                    "30万円（300000）に変更してください。",
+        "answer_sql": "UPDATE employees\nSET salary = 300000\nWHERE id = 3;",
+        "choices": [
+            "UPDATE employees\nSET salary = 300000\nWHERE id = 3;",
+            "UPDATE employees\nSET salary = 300000;",
+            "UPDATE employees\nsalary = 300000\nWHERE id = 3;",
+            "INSERT INTO employees\nSET salary = 300000\nWHERE id = 3;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "データを変更するときは `UPDATE` を使います。\n\n"
+            "・`UPDATE employees` … どの表を変更するか。\n"
+            "・`SET salary = 300000` … どの列をどんな値にするか。\n"
+            "・`WHERE id = 3` … どの行を変えるか。ここが大事です。"
+        ),
+        "points": (
+            "・`WHERE` を付け忘れると、表の『全部の行』の月給が書き換わってしまいます。要注意。\n"
+            "・変更する値は `SET 列 = 値` の形で書きます。"
+        ),
+    },
+    {
+        "id": 38,
+        "hint": (
+            "- データの削除は `DELETE FROM 表名 WHERE 条件;`\n"
+            "- `WHERE` を付け忘れると、全部の行が消えてしまう"
+        ),
+        "topic": "データ操作（INSERT/UPDATE/DELETE）",
+        "level": 6,
+        "question": "注文（orders）から、id が 10 の注文を1件だけ削除してください。",
+        "answer_sql": "DELETE FROM orders\nWHERE id = 10;",
+        "choices": [
+            "DELETE FROM orders\nWHERE id = 10;",
+            "DELETE orders\nWHERE id = 10;",
+            "DELETE * FROM orders\nWHERE id = 10;",
+            "DELETE FROM orders;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "データを削除するときは `DELETE FROM` を使います。\n\n"
+            "・`DELETE FROM orders` … どの表から消すか。\n"
+            "・`WHERE id = 10` … どの行を消すか。\n\n"
+            "SELECT と違い、消す列を選ぶ `*` は書きません（行ごとまるごと消えます）。"
+        ),
+        "points": (
+            "・`DELETE` のあとには `FROM` が必要です。\n"
+            "・`WHERE` を付け忘れると、表の『全部の行』が消えてしまいます。いちばん危険な書き間違いです。"
+        ),
+    },
+    {
+        "id": 39,
+        "hint": (
+            "- まとめて追加するときは `VALUES (...), (...)` とカンマで並べる\n"
+            "- 1件のときと同じ `INSERT INTO` を使う"
+        ),
+        "topic": "データ操作（INSERT/UPDATE/DELETE）",
+        "level": 6,
+        "question": "商品（products）に、次の2件をまとめて追加してください。"
+                    "(id=7, name='付箋', category='文具', price=200) と "
+                    "(id=8, name='ホチキス', category='文具', price=500)。",
+        "answer_sql": (
+            "INSERT INTO products (id, name, category, price)\n"
+            "VALUES (7, '付箋', '文具', 200),\n"
+            "       (8, 'ホチキス', '文具', 500);"
+        ),
+        "choices": [
+            "INSERT INTO products (id, name, category, price)\nVALUES (7, '付箋', '文具', 200),\n       (8, 'ホチキス', '文具', 500);",
+            "INSERT INTO products (id, name, category, price)\nVALUES (7, '付箋', '文具', 200)\n       (8, 'ホチキス', '文具', 500);",
+            "INSERT INTO products (id, name, category, price)\nVALUES (7, '付箋', '文具', 200) AND (8, 'ホチキス', '文具', 500);",
+            "INSERT INTO products (id, name, category, price)\nVALUES (7, '付箋', '文具', 200);\nVALUES (8, 'ホチキス', '文具', 500);",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "複数の行をまとめて追加するときは、`VALUES` のあとに「(値の組)」をカンマ `,` で並べます。\n\n"
+            "・`VALUES (7, ...), (8, ...)` … 2件分の値をカンマで区切って書きます。\n\n"
+            "1件ずつ INSERT を2回書いてもよいですが、まとめると1文で追加できます。"
+        ),
+        "points": (
+            "・行と行の区切りはカンマ `,`。`AND` や、途中のセミコロン `;` ではありません。\n"
+            "・`;` は文の終わりに1回だけ付けます。"
+        ),
+    },
+    {
+        "id": 40,
+        "hint": (
+            "- 今の値をもとに計算するときは `SET 列 = 列 + 値`\n"
+            "- `SET 列 = 値` だと、その値で上書きしてしまう"
+        ),
+        "topic": "データ操作（INSERT/UPDATE/DELETE）",
+        "level": 6,
+        "question": "開発部（department_id が 2）に所属する社員 全員の月給（salary）を、"
+                    "今より 1万円（10000）上げてください。",
+        "answer_sql": (
+            "UPDATE employees\n"
+            "SET salary = salary + 10000\n"
+            "WHERE department_id = 2;"
+        ),
+        "choices": [
+            "UPDATE employees\nSET salary = salary + 10000\nWHERE department_id = 2;",
+            "UPDATE employees\nSET salary = 10000\nWHERE department_id = 2;",
+            "UPDATE employees\nSET salary = salary + 10000;",
+            "UPDATE employees\nSET salary + 10000\nWHERE department_id = 2;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "『今の値に足す』ときは、`SET salary = salary + 10000` と書きます。"
+            "右側の `salary` は『今の月給』を表し、それに 10000 を足した値で更新します。\n\n"
+            "・`WHERE department_id = 2` … 開発部の社員だけが対象になります。"
+        ),
+        "points": (
+            "・`SET salary = 10000` と書くと、足し算ではなく『10000円に上書き』になってしまいます。\n"
+            "・`WHERE` を付けないと、全社員の月給が上がってしまいます。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv6（集計：SUM・MAX）
+    # =====================================================================
+    {
+        "id": 41,
+        "hint": (
+            "- 合計は `SUM(列)` で求める\n"
+            "- 件数を数える `COUNT` とは役割が違う"
+        ),
+        "topic": "集計関数と GROUP BY",
+        "level": 8,
+        "question": "注文（orders）の数量（quantity）を、すべての注文について合計した値を求めてください。",
+        "answer_sql": "SELECT SUM(quantity)\nFROM orders;",
+        "choices": [
+            "SELECT SUM(quantity)\nFROM orders;",
+            "SELECT COUNT(quantity)\nFROM orders;",
+            "SELECT TOTAL(quantity)\nFROM orders;",
+            "SELECT SUM(*)\nFROM orders;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "数値の合計を出すときは `SUM(列)` を使います。\n\n"
+            "・`SUM(quantity)` … すべての注文の数量を足し合わせます。\n\n"
+            "`COUNT` は『件数（何行あるか）』を数える関数なので、合計とは別物です。"
+        ),
+        "points": (
+            "・合計は `SUM`、件数は `COUNT`。目的で使い分けます。\n"
+            "・MySQL に `TOTAL` という関数はありません。合計は `SUM` です。"
+        ),
+    },
+    {
+        "id": 42,
+        "hint": (
+            "- 最大値は `MAX(列)`、最小値は `MIN(列)`\n"
+            "- どちらも数値や日付の列に使える"
+        ),
+        "topic": "集計関数と GROUP BY",
+        "level": 8,
+        "question": "商品（products）の中で、いちばん高い単価（price）はいくらか求めてください。",
+        "answer_sql": "SELECT MAX(price)\nFROM products;",
+        "choices": [
+            "SELECT MAX(price)\nFROM products;",
+            "SELECT MIN(price)\nFROM products;",
+            "SELECT MAX(*)\nFROM products;",
+            "SELECT LARGEST(price)\nFROM products;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "いちばん大きい値（最大値）を求めるときは `MAX(列)` を使います。\n\n"
+            "・`MAX(price)` … 単価の中でいちばん高い金額を返します。\n\n"
+            "反対に、いちばん小さい値（最小値）は `MIN(列)` です。"
+        ),
+        "points": (
+            "・最大は `MAX`、最小は `MIN`。\n"
+            "・MySQL に `LARGEST` という関数はありません。最大値は `MAX` です。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv2（列の別名 AS・計算した列）
+    # =====================================================================
+    {
+        "id": 43,
+        "hint": (
+            "- `列 AS 別名` … 列に表示用の名前（見出し）を付けられる\n"
+            "- 元の列名はそのまま、表示だけ変わる"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 2,
+        "question": "社員（employees）の名前（name）と月給（salary）を表示してください。"
+                    "ただし salary の列の見出しを「月給」という名前にして表示してください。",
+        "answer_sql": "SELECT name, salary AS 月給\nFROM employees;",
+        "choices": [
+            "SELECT name, salary AS 月給\nFROM employees;",
+            "SELECT name, 月給 AS salary\nFROM employees;",
+            "SELECT name, salary = 月給\nFROM employees;",
+            "SELECT name, salary TO 月給\nFROM employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "列に表示用の名前（別名）を付けたいときは `列 AS 別名` と書きます。\n\n"
+            "・`salary AS 月給` … 中身は salary のまま、見出しだけ『月給』になります。\n\n"
+            "結果が読みやすくなり、計算した列に名前を付けるときにも役立ちます。"
+        ),
+        "points": (
+            "・`AS` の『前』が元の列、『後ろ』が新しい見出しです。順番を逆にしないこと。\n"
+            "・`AS` は省略もできます（`salary 月給`）が、付けたほうが分かりやすいです。"
+        ),
+    },
+    {
+        "id": 44,
+        "hint": (
+            "- `SELECT` の中で計算ができる（`+ - * /`）\n"
+            "- 掛け算は `*`。計算した列には `AS` で名前を付けると分かりやすい"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 2,
+        "question": "社員（employees）の名前（name）と、月給（salary）から計算した年収"
+                    "（月給 × 12）を表示してください。計算した列には「年収」という見出しを付けてください。",
+        "answer_sql": "SELECT name, salary * 12 AS 年収\nFROM employees;",
+        "choices": [
+            "SELECT name, salary * 12 AS 年収\nFROM employees;",
+            "SELECT name, salary x 12 AS 年収\nFROM employees;",
+            "SELECT name, SUM(salary * 12) AS 年収\nFROM employees;",
+            "SELECT name, salary * 12\nFROM employees AS 年収;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "`SELECT` の中では計算ができます。\n\n"
+            "・`salary * 12` … 月給を12倍して年収を計算します。\n"
+            "・`AS 年収` … 計算した列に見出しを付けます。\n\n"
+            "四則演算は `+`（足す）`-`（引く）`*`（掛ける）`/`（割る）を使います。"
+        ),
+        "points": (
+            "・掛け算の記号は `*` です（`x` ではありません）。\n"
+            "・`SUM(...)` を付けると全員分を1つに合計してしまいます。1人ずつ計算したいときは付けません。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv3（NULL でない＝IS NOT NULL）
+    # =====================================================================
+    {
+        "id": 45,
+        "hint": (
+            "- 空っぽ（NULL）かどうかは `IS NULL` / `IS NOT NULL` で調べる\n"
+            "- NULL には `=` や `!=` は使えない"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 3,
+        "question": "上司がいる社員（manager_id が空っぽ＝NULL でない人）の "
+                    "名前（name）を表示してください。",
+        "answer_sql": "SELECT name\nFROM employees\nWHERE manager_id IS NOT NULL;",
+        "choices": [
+            "SELECT name\nFROM employees\nWHERE manager_id IS NOT NULL;",
+            "SELECT name\nFROM employees\nWHERE manager_id != NULL;",
+            "SELECT name\nFROM employees\nWHERE manager_id NOT NULL;",
+            "SELECT name\nFROM employees\nWHERE manager_id <> '';",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "値が空っぽ（NULL）でないことを調べるときは `IS NOT NULL` を使います。\n\n"
+            "・`WHERE manager_id IS NOT NULL` … 上司の社員idが入っている（＝上司がいる）人だけ残します。\n\n"
+            "反対に『NULL である』を調べるときは `IS NULL` です。"
+        ),
+        "points": (
+            "・『NULL でない』は `IS NOT NULL`。`!= NULL` や `= NULL` は正しく動きません。\n"
+            "・NULL（値がない状態）と、空文字 `''`（長さ0の文字）は別物です。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv4（IN：複数の値のどれか）
+    # =====================================================================
+    {
+        "id": 46,
+        "hint": (
+            "- `列 IN (値1, 値2, ...)` … リストの値の『どれかと一致』する行を残す\n"
+            "- `= 値1 OR = 値2 OR ...` を短く書ける"
+        ),
+        "topic": "SELECT と WHERE",
+        "level": 4,
+        "question": "営業部（department_id が 1）または 人事部（department_id が 3）に "
+                    "所属する社員の、名前（name）と部署ID（department_id）を表示してください。",
+        "answer_sql": (
+            "SELECT name, department_id\n"
+            "FROM employees\n"
+            "WHERE department_id IN (1, 3);"
+        ),
+        "choices": [
+            "SELECT name, department_id\nFROM employees\nWHERE department_id IN (1, 3);",
+            "SELECT name, department_id\nFROM employees\nWHERE department_id = 1 OR 3;",
+            "SELECT name, department_id\nFROM employees\nWHERE department_id IN (1 OR 3);",
+            "SELECT name, department_id\nFROM employees\nWHERE department_id = (1, 3);",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "いくつかの値の『どれかに一致』を調べるときは `IN` が便利です。\n\n"
+            "・`department_id IN (1, 3)` … 部署IDが 1 または 3 の社員を残します。\n\n"
+            "これは `department_id = 1 OR department_id = 3` と同じ意味で、短く書けます。"
+        ),
+        "points": (
+            "・`IN` のカッコの中はカンマ `,` で区切ります。\n"
+            "・`= 1 OR 3` のような書き方はできません。`=` は1つの値としか比べられないからです。"
+        ),
+    },
+
+    # =====================================================================
+    # 追加: Lv7（並び替え：昇順 ASC）
+    # =====================================================================
+    {
+        "id": 47,
+        "hint": (
+            "- 並び替えは `ORDER BY 列`。`ASC` は昇順（小さい順）\n"
+            "- 大きい順にしたいときは `DESC`"
+        ),
+        "topic": "並び替え・重複除去",
+        "level": 7,
+        "question": "商品（products）を、単価（price）の安い順（小さい順）に並べて、"
+                    "名前（name）と単価（price）を表示してください。",
+        "answer_sql": "SELECT name, price\nFROM products\nORDER BY price ASC;",
+        "choices": [
+            "SELECT name, price\nFROM products\nORDER BY price ASC;",
+            "SELECT name, price\nFROM products\nORDER BY price DESC;",
+            "SELECT name, price\nFROM products\nSORT BY price ASC;",
+            "SELECT name, price\nFROM products\nORDER price ASC;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "並び替えは `ORDER BY` を使います。\n\n"
+            "・`ORDER BY price ASC` … 単価の小さい順（安い順）に並べます。\n\n"
+            "`ASC` は昇順（小→大）。反対に大きい順にしたいときは `DESC`（降順）を使います。"
+        ),
+        "points": (
+            "・昇順（小→大）は `ASC`、降順（大→小）は `DESC`。何も書かないと昇順になります。\n"
+            "・並び替えは `ORDER BY`。`SORT BY` ではありません。`BY` の書き忘れにも注意。"
         ),
     },
 ]
