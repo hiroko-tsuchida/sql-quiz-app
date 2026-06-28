@@ -39,6 +39,21 @@ def problems_for_level(level: int):
     return [p for p in PROBLEMS if p["level"] == level]
 
 
+def three_choices(problem: dict):
+    """4つの選択肢から誤答を1つ減らして「3択」にする。
+
+    データ（problems.py）は正解1つ＋誤答3つの4択のまま保持し、
+    出題時にここで3択へ縮める（最後の誤答を1つ落とす）。
+    戻り値: (3つの選択肢リスト, その中での正解の位置)
+    """
+    choices = problem["choices"]
+    correct = problem["answer_index"]
+    wrong_indices = [i for i in range(len(choices)) if i != correct]
+    drop = wrong_indices[-1]  # 最後の誤答を1つ落とす
+    kept = [i for i in range(len(choices)) if i != drop]
+    return [choices[i] for i in kept], kept.index(correct)
+
+
 # 進捗として保存する session_state のキー。
 # メタ進捗（解放/合格/点数）に加えて「途中の攻略状態」も保存することで、
 # 1問ごとにチェックポイント保存し、次回は途中の問題から再開できる。
@@ -180,10 +195,11 @@ def start_round(level: int, ids: list, is_first: bool):
 
 
 def check_answer(problem: dict, radio_key: str):
-    """『答え合わせ』ボタン。選んだ選択肢を採点する。"""
+    """『答え合わせ』ボタン。選んだ選択肢を採点する（3択）。"""
+    _, correct_index = three_choices(problem)
     chosen_label = ss[radio_key]
     chosen_index = ord(chosen_label) - ord("A")
-    is_correct = chosen_index == problem["answer_index"]
+    is_correct = chosen_index == correct_index
     ss.answered = True
     ss.last_correct = is_correct
     if is_correct:
@@ -360,7 +376,7 @@ def render_question(problem: dict):
         with st.expander("💡 ヒントを見る（構文の意味）"):
             st.markdown(problem["hint"])
 
-    choices = problem["choices"]
+    choices, correct_index = three_choices(problem)
     labels = [chr(ord("A") + i) for i in range(len(choices))]
 
     st.markdown("#### 選択肢（正しい SQL を1つ選んでください）")
@@ -382,7 +398,7 @@ def render_question(problem: dict):
         )
     else:
         # 答え合わせ後：結果と解説、次へボタン
-        correct_label = labels[problem["answer_index"]]
+        correct_label = labels[correct_index]
         if ss.last_correct:
             st.success(f"正解！　答えは {correct_label} です。")
         else:
