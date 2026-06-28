@@ -261,6 +261,15 @@ def render_result():
             ss.unlocked = max(ss.unlocked, lv + 1)
 
         st.success(f"🎉 全問正解！ Lv{lv} は【合格】です。")
+        # 風船の上昇アニメを半分の速さに（標準は 750ms → 1500ms に上書き）。
+        # Streamlit の風船は data-testid="stBalloons" の中の img をインラインで
+        # animationDuration:750ms にしているため、!important で上書きする。
+        st.markdown(
+            "<style>"
+            '[data-testid="stBalloons"] img { animation-duration: 1500ms !important; }'
+            "</style>",
+            unsafe_allow_html=True,
+        )
         st.balloons()
 
         if lv < MAX_LEVEL:
