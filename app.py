@@ -284,12 +284,6 @@ for info in LEVELS:
 
 st.sidebar.divider()
 st.sidebar.metric("合格したレベル", f"{len(ss.passed)} / {MAX_LEVEL}")
-st.sidebar.button(
-    "🌙 今日はここまで（保存して終了）",
-    type="primary",
-    use_container_width=True,
-    on_click=end_session,
-)
 st.sidebar.button("進捗をリセット", on_click=reset_progress)
 
 
@@ -363,11 +357,20 @@ def render_question(problem: dict):
             st.info(problem["points"])
 
         is_last = ss.pos >= len(ss.queue) - 1
-        st.button(
-            "結果を見る →" if is_last else "次の問題 →",
-            type="primary",
-            on_click=go_next,
-        )
+        col_next, col_end = st.columns(2)
+        with col_next:
+            st.button(
+                "結果を見る" if is_last else "次の問題",
+                type="primary",
+                on_click=go_next,
+                use_container_width=True,
+            )
+        with col_end:
+            st.button(
+                "🌙 今日はここまで",
+                on_click=end_session,
+                use_container_width=True,
+            )
 
 
 def render_result():
