@@ -330,7 +330,8 @@ for info in LEVELS:
     # どのレベルもいつでも選べる（ロックなし）。合格済みは ✅ で示す。
     mark = "✅" if lv in ss.passed else "▶️"
 
-    label = f"{mark} Lv{lv} {info['title']}（{n}問）"
+    # 「Lv＋数字＋ピリオド」を太字にする（ボタンのラベルは Markdown が使える）。
+    label = f"{mark} **Lv{lv}.** {info['title']}（{n}問）"
     st.sidebar.button(
         label,
         key=f"lv_{lv}",
