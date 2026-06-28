@@ -489,11 +489,11 @@ def render_result():
         _petals = "".join(
             f"<span class='flower' style='"
             f"left:{random.uniform(0, 100):.1f}%;"
-            f"font-size:{random.uniform(1.2, 2.6):.2f}rem;"
+            f"font-size:{random.uniform(1.8, 3.9):.2f}rem;"
             f"animation-delay:{random.uniform(0, 1.2):.2f}s;"
             f"animation-duration:{random.uniform(2.6, 4.6):.2f}s;'>"
             f"{random.choice(_flowers)}</span>"
-            for _ in range(45)
+            for _ in range(135)
         )
         st.markdown(
             "<style>"
