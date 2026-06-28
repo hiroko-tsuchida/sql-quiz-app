@@ -14,6 +14,8 @@
 import json
 import os
 
+import altair as alt
+import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -227,6 +229,37 @@ def resume_session():
     ss.ended = False
 
 
+def render_progress_donut(container):
+    """合格したレベルを輪（ドーナツ）グラフで表示する。"""
+    passed_n = len(ss.passed)
+    df = pd.DataFrame(
+        {
+            "区分": ["合格", "未合格"],
+            "レベル数": [passed_n, MAX_LEVEL - passed_n],
+        }
+    )
+    ring = (
+        alt.Chart(df)
+        .mark_arc(innerRadius=45, outerRadius=70)
+        .encode(
+            theta=alt.Theta("レベル数:Q", stack=True),
+            color=alt.Color(
+                "区分:N",
+                scale=alt.Scale(domain=["合格", "未合格"], range=["#2E7D32", "#E0E0E0"]),
+                legend=alt.Legend(title=None, orient="bottom"),
+            ),
+            order=alt.Order("区分:N"),
+            tooltip=["区分:N", "レベル数:Q"],
+        )
+    )
+    center = (
+        alt.Chart(pd.DataFrame({"label": [f"{passed_n}/{MAX_LEVEL}"]}))
+        .mark_text(size=24, fontWeight="bold", color="#2E7D32")
+        .encode(text="label:N")
+    )
+    container.altair_chart(ring + center, use_container_width=True)
+
+
 # =============================================================================
 # 「今日はここまで」終了画面（保存してタブを閉じる）
 # =============================================================================
@@ -289,7 +322,8 @@ for info in LEVELS:
     st.sidebar.write(f"Lv{lv}：{status}")
 
 st.sidebar.divider()
-st.sidebar.metric("合格したレベル", f"{len(ss.passed)} / {MAX_LEVEL}")
+st.sidebar.subheader("合格したレベル")
+render_progress_donut(st.sidebar)
 st.sidebar.button("進捗をリセット", on_click=reset_progress)
 
 
