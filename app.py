@@ -36,22 +36,57 @@ def problems_for_level(level: int):
     return [p for p in PROBLEMS if p["level"] == level]
 
 
+# 進捗として保存する session_state のキー。
+# メタ進捗（解放/合格/点数）に加えて「途中の攻略状態」も保存することで、
+# 1問ごとにチェックポイント保存し、次回は途中の問題から再開できる。
+PERSIST_KEYS = [
+    "unlocked", "passed", "level_score", "selected_level",
+    "active", "finished", "round_level", "queue", "pos", "wrong",
+    "answered", "last_correct", "is_first_round", "first_correct", "round_id",
+]
+
+
 # --- 進捗の保存／復元用（純関数なので単体テストしやすい）-----------------------
-def serialize_progress(unlocked, passed, level_score) -> dict:
-    """保存する進捗（解放レベル・合格・点数）を JSON 化できる dict にする。"""
+def serialize_progress(s: dict) -> dict:
+    """session_state のスナップショット(dict)を JSON 化できる形にする。"""
     return {
-        "unlocked": int(unlocked),
-        "passed": sorted(int(x) for x in passed),
-        "level_score": {str(k): list(v) for k, v in level_score.items()},
+        "unlocked": int(s["unlocked"]),
+        "passed": sorted(int(x) for x in s["passed"]),
+        "level_score": {str(k): list(v) for k, v in s["level_score"].items()},
+        "selected_level": int(s["selected_level"]),
+        "active": bool(s["active"]),
+        "finished": bool(s["finished"]),
+        "round_level": int(s["round_level"]),
+        "queue": [int(x) for x in s["queue"]],
+        "pos": int(s["pos"]),
+        "wrong": sorted(int(x) for x in s["wrong"]),
+        "answered": bool(s["answered"]),
+        "last_correct": bool(s["last_correct"]),
+        "is_first_round": bool(s["is_first_round"]),
+        "first_correct": int(s["first_correct"]),
+        "round_id": int(s["round_id"]),
     }
 
 
-def deserialize_progress(data: dict):
-    """保存された dict から (unlocked, passed:set, level_score:dict) を復元する。"""
-    unlocked = int(data.get("unlocked", 1))
-    passed = set(int(x) for x in data.get("passed", []))
-    level_score = {int(k): tuple(v) for k, v in data.get("level_score", {}).items()}
-    return unlocked, passed, level_score
+def deserialize_progress(d: dict) -> dict:
+    """保存された dict を session_state に入れられる形(型)に復元する。"""
+    return {
+        "unlocked": int(d.get("unlocked", 1)),
+        "passed": set(int(x) for x in d.get("passed", [])),
+        "level_score": {int(k): tuple(v) for k, v in d.get("level_score", {}).items()},
+        "selected_level": int(d.get("selected_level", 1)),
+        "active": bool(d.get("active", False)),
+        "finished": bool(d.get("finished", False)),
+        "round_level": int(d.get("round_level", 1)),
+        "queue": [int(x) for x in d.get("queue", [])],
+        "pos": int(d.get("pos", 0)),
+        "wrong": set(int(x) for x in d.get("wrong", [])),
+        "answered": bool(d.get("answered", False)),
+        "last_correct": bool(d.get("last_correct", False)),
+        "is_first_round": bool(d.get("is_first_round", True)),
+        "first_correct": int(d.get("first_correct", 0)),
+        "round_id": int(d.get("round_id", 0)),
+    }
 
 
 # =============================================================================
@@ -92,24 +127,23 @@ if STORAGE_ENABLED:
         if raw:
             try:
                 data = raw if isinstance(raw, dict) else json.loads(raw)
-                ss.unlocked, ss.passed, ss.level_score = deserialize_progress(data)
+                for k, v in deserialize_progress(data).items():
+                    ss[k] = v
             except Exception:
                 pass  # 壊れたデータは無視して最初から
         # 直後の無駄な再保存を防ぐため、現在値を「保存済み」として記録
         ss["_saved_payload"] = json.dumps(
-            serialize_progress(ss.unlocked, ss.passed, ss.level_score),
-            ensure_ascii=False,
+            serialize_progress({k: ss[k] for k in PERSIST_KEYS}), ensure_ascii=False
         )
         ss["_loaded_from_storage"] = True
 
 
 def save_progress():
-    """進捗が変わっていればブラウザに保存する。"""
+    """進捗（途中の攻略状態を含む）が変わっていればブラウザに保存する。"""
     if not (STORAGE_ENABLED and localS is not None):
         return
     payload = json.dumps(
-        serialize_progress(ss.unlocked, ss.passed, ss.level_score),
-        ensure_ascii=False,
+        serialize_progress({k: ss[k] for k in PERSIST_KEYS}), ensure_ascii=False
     )
     if ss.get("_saved_payload") != payload:
         localS.setItem(PROGRESS_KEY, payload, key="sqlquiz_save")
@@ -366,8 +400,8 @@ def render_result():
 
 
 # --- 画面の出し分け ----------------------------------------------------------
-if ss.active:
-    # 攻略中：いまの問題を出す
+if ss.active and ss.queue and 0 <= ss.pos < len(ss.queue):
+    # 攻略中：いまの問題を出す（途中保存からの再開もここに入る）
     render_question(_BY_ID[ss.queue[ss.pos]])
 elif ss.finished:
     # 結果画面
