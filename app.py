@@ -4,11 +4,10 @@
     streamlit run app.py
 
 遊び方:
-    - Lv1（やさしい）から順に挑戦する。レベルは全部で5つ。
-    - 各問題は4択。正しい SQL を選んで「答え合わせ」する。
+    - レベルは全部で5つ。どのレベルからでも自由に選んで挑戦できる。
+    - 各問題は3択。正しい SQL を選んで「答え合わせ」する。
     - レベルの問題を最後まで解くと、点数と間違えた問題が出る。
     - 間違えた問題は「もう一度」で再挑戦。全問正解すると【合格】。
-    - 合格すると次のレベルが解放される（まだ解いていない先のレベルはロック）。
 """
 
 import json
@@ -303,25 +302,18 @@ st.sidebar.subheader("レベルを選ぶ")
 for info in LEVELS:
     lv = info["level"]
     n = len(problems_for_level(lv))
-    if lv in ss.passed:
-        mark, locked = "✅", False
-    elif lv <= ss.unlocked:
-        mark, locked = "▶️", False
-    else:
-        mark, locked = "🔒", True
+    # どのレベルもいつでも選べる（ロックなし）。合格済みは ✅ で示す。
+    mark = "✅" if lv in ss.passed else "▶️"
 
     label = f"{mark} Lv{lv} {info['title']}（{n}問）"
-    if locked:
-        st.sidebar.button(label, key=f"lv_{lv}", disabled=True, use_container_width=True)
-    else:
-        st.sidebar.button(
-            label,
-            key=f"lv_{lv}",
-            type="primary" if lv == ss.selected_level else "secondary",
-            use_container_width=True,
-            on_click=select_level,
-            args=(lv,),
-        )
+    st.sidebar.button(
+        label,
+        key=f"lv_{lv}",
+        type="primary" if lv == ss.selected_level else "secondary",
+        use_container_width=True,
+        on_click=select_level,
+        args=(lv,),
+    )
 
 # レベルごとの点数
 st.sidebar.divider()
@@ -462,7 +454,7 @@ def render_result():
 
         if lv < MAX_LEVEL:
             next_info = _LEVEL_INFO[lv + 1]
-            st.write(f"次は **Lv{lv + 1}（{next_info['title']}）** が解放されました。")
+            st.write(f"次は **Lv{lv + 1}（{next_info['title']}）** に挑戦してみましょう。")
             st.button(
                 f"Lv{lv + 1} へ進む →",
                 type="primary",
