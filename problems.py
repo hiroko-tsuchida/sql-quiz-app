@@ -922,7 +922,7 @@ PROBLEMS = [
         ),
         "topic": "SELECT と WHERE",
         "level": 1,
-        "question": "商品（products）の表について、すべての列・すべての行を表示してください。",
+        "question": "商品（products）の表から、すべての商品について、すべての列を表示してください。",
         "answer_sql": "SELECT *\nFROM products;",
         "choices": [
             "SELECT ALL\nFROM products;",
@@ -982,8 +982,8 @@ PROBLEMS = [
         ),
         "topic": "SELECT と WHERE",
         "level": 1,
-        "question": "商品（products）の名前（name）と単価（price）の2つの列を、"
-                    "すべての行について表示してください。",
+        "question": "商品（products）の表から、すべての商品の"
+                    "名前（name）と単価（price）を表示してください。",
         "answer_sql": "SELECT name, price\nFROM products;",
         "choices": [
             "SELECT name, price\nFROM products;",
@@ -1011,7 +1011,7 @@ PROBLEMS = [
         ),
         "topic": "SELECT と WHERE",
         "level": 2,
-        "question": "部署（departments）の表について、すべての列・すべての行を表示してください。",
+        "question": "部署（departments）の表から、すべての部署について、すべての列を表示してください。",
         "answer_sql": "SELECT *\nFROM departments;",
         "choices": [
             "SELECT *\nFROM departments;",
@@ -1038,8 +1038,8 @@ PROBLEMS = [
         ),
         "topic": "SELECT と WHERE",
         "level": 2,
-        "question": "社員（employees）の月給（salary）と名前（name）を、"
-                    "『月給 → 名前』の順番で、すべての行について表示してください。",
+        "question": "社員（employees）の表から、すべての社員の月給（salary）と名前（name）を、"
+                    "『月給 → 名前』の順番で表示してください。",
         "answer_sql": "SELECT salary, name\nFROM employees;",
         "choices": [
             "SELECT salary, name\nFROM employees;",
