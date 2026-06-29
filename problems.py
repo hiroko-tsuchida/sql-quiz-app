@@ -343,7 +343,8 @@ PROBLEMS = [
         ),
         "topic": "テーブル結合（JOIN）",
         "level": 10,
-        "question": "社員の名前（name）と、所属する部署の名前を表示してください。",
+        "question": "社員の名前（name）と、所属する部署の名前を表示してください。"
+                    "（社員の表にある部署番号を、部署の表で名前に置きかえるイメージです。）",
         "answer_sql": (
             "SELECT employees.name, departments.name AS 部署名\n"
             "FROM employees\n"
