@@ -366,14 +366,19 @@ def render_answer_result(problem: dict):
         st.caption("（この SQL の実行結果は表示できませんでした）")
         return
 
+    # 実行結果の表は最大 3 行まで表示する（多いときは先頭だけ見せる）。
+    max_rows = 3
     st.markdown("#### ▶️ 実行結果")
     if result["kind"] == "select":
         df = result["df"]
         if df.empty:
             st.caption("条件にあう行はありません（0 件）。")
         else:
-            st.dataframe(df, hide_index=True, use_container_width=True)
-            st.caption(f"{len(df)} 件")
+            st.dataframe(df.head(max_rows), hide_index=True, use_container_width=True)
+            if len(df) > max_rows:
+                st.caption(f"{len(df)} 件中 先頭 {max_rows} 件を表示")
+            else:
+                st.caption(f"{len(df)} 件")
     else:
         # INSERT / UPDATE / DELETE：実行後のテーブルの中身を見せる
         table = result["table"]
@@ -382,7 +387,10 @@ def render_answer_result(problem: dict):
             f"実行後の {table} テーブルは次のとおりです。"
         )
         if result["df"] is not None:
-            st.dataframe(result["df"], hide_index=True, use_container_width=True)
+            df = result["df"]
+            st.dataframe(df.head(max_rows), hide_index=True, use_container_width=True)
+            if len(df) > max_rows:
+                st.caption(f"{len(df)} 件中 先頭 {max_rows} 件を表示")
 
 
 def render_question(problem: dict):
