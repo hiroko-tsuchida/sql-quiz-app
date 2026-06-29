@@ -419,15 +419,13 @@ def render_question(problem: dict):
     labels = [chr(ord("A") + i) for i in range(len(choices))]
 
     st.markdown("#### 選択肢")
+    for label, sql in zip(labels, choices):
+        st.markdown(f"**{label}**")
+        st.code(sql, language="sql")
+
     # key にラウンド番号を含め、毎ラウンド・各問題でラジオを独立させる
     radio_key = f"choice_{problem['id']}_{ss.round_id}"
-    # ラジオ（A/B/C）を左に、対応する SQL を右に並べて表示する
-    col_radio, col_sql = st.columns([1, 9])
-    with col_radio:
-        st.radio("あなたの答え", labels, key=radio_key, label_visibility="collapsed")
-    with col_sql:
-        for sql in choices:
-            st.code(sql, language="sql")
+    st.radio("あなたの答え", labels, key=radio_key, horizontal=True)
 
     if not ss.answered:
         # まだ答え合わせ前：答え合わせボタンだけ出す
