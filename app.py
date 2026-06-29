@@ -180,6 +180,7 @@ def go_next():
     ss.pos += 1
     ss.answered = False
     ss.last_correct = False
+    ss.scroll_to_top = True  # 次の画面ではページ先頭へスクロールする
     if ss.pos >= len(ss.queue):
         ss.active = False
         ss.finished = True
@@ -553,6 +554,43 @@ def render_result():
         on_click=select_level,
         args=(lv,),
     )
+
+
+def scroll_to_top():
+    """親ページ（Streamlit 本体）をいちばん上までスクロールする。
+
+    コンポーネントは iframe の中で動くので、window.parent 側のスクロール要素を
+    たどってトップへ戻す。再実行直後の描画タイミングのブレに備えて数回試す。
+    """
+    components.html(
+        """
+        <script>
+        const toTop = () => {
+            const doc = window.parent.document;
+            const targets = [
+                doc.querySelector('section.main'),
+                doc.querySelector('[data-testid="stMain"]'),
+                doc.querySelector('.stMainBlockContainer'),
+                doc.scrollingElement, doc.documentElement, doc.body,
+            ];
+            for (const el of targets) {
+                if (el) { try { el.scrollTo(0, 0); } catch (e) {} }
+            }
+            try { window.parent.scrollTo(0, 0); } catch (e) {}
+        };
+        toTop();
+        setTimeout(toTop, 50);
+        setTimeout(toTop, 150);
+        </script>
+        """,
+        height=0,
+    )
+
+
+# 「次の問題」などで進んだ直後は、ページ先頭へスクロールする
+if ss.get("scroll_to_top"):
+    scroll_to_top()
+    ss.scroll_to_top = False
 
 
 # --- 画面の出し分け ----------------------------------------------------------
