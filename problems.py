@@ -276,7 +276,8 @@ PROBLEMS = [
         ),
         "topic": "集計関数と GROUP BY",
         "level": 8,
-        "question": "部署（department_id）ごとに、平均の月給を求めてください。",
+        "question": "部署（department_id）ごとに、平均の月給を求めて、"
+                    "部署IDと平均月給を表示してください。",
         "answer_sql": (
             "SELECT department_id, AVG(salary) AS 平均給料\n"
             "FROM employees\n"
@@ -522,7 +523,8 @@ PROBLEMS = [
         ),
         "topic": "サブクエリ",
         "level": 11,
-        "question": "各部署で最も月給が高い社員について、部署ID・名前・月給を表示してください。",
+        "question": "各部署で最も月給が高い社員について、"
+                    "その社員の『部署ID・氏名・月給』を表示してください。",
         "answer_sql": (
             "SELECT e.department_id, e.name, e.salary\n"
             "FROM employees e\n"
@@ -564,7 +566,8 @@ PROBLEMS = [
         ),
         "topic": "文字列・日付の関数",
         "level": 5,
-        "question": "名前に『藤』という文字が含まれる社員を、すべて表示してください。",
+        "question": "名前（name）に『藤』という文字が含まれる社員の名前を、"
+                    "すべて表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE name LIKE '%藤%';",
         "choices": [
             "SELECT name\nFROM employees\nWHERE name = '%藤%';",
@@ -812,8 +815,9 @@ PROBLEMS = [
         ),
         "topic": "ウィンドウ関数",
         "level": 12,
-        "question": "部署ごとに、月給の高い順の順位を付けてください。"
-                    "部署ID・名前・月給・部署内順位を表示してください。",
+        "question": "社員を部署ごとに分け、月給の高い順に順位を付けてください。"
+                    "各社員の『部署ID・氏名・月給』と、その『部署内での順位』を"
+                    "表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary,\n"
             "       RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS 部署内順位\n"
@@ -847,7 +851,7 @@ PROBLEMS = [
         "topic": "ウィンドウ関数",
         "level": 12,
         "question": "各部署で月給が最も高い社員（部署内1位）だけを取り出して、"
-                    "部署ID・名前・月給を表示してください。",
+                    "その社員の『部署ID・氏名・月給』を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary\n"
             "FROM (\n"
