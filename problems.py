@@ -3,7 +3,7 @@
 1 問は辞書（dict）で表します。キーの意味:
   id          … 通し番号
   topic       … 項目（トピック）。学習の区分け
-  level       … 攻略レベル 1〜12（小さいほどやさしい。下の LEVELS と対応）
+  level       … 攻略レベル 1〜13（小さいほどやさしい。下の LEVELS と対応）
   question    … 問題文
   choices     … 4つの選択肢（SQL 文字列のリスト）。1つだけが正解
   answer_index… choices の中で正解が何番目か（0〜3）
@@ -27,21 +27,22 @@ TOPICS = [
     "ウィンドウ関数",
 ]
 
-# レベル（攻略の段階）。やさしい順に Lv1〜Lv12。
+# レベル（攻略の段階）。やさしい順に Lv1〜Lv13。
 # 各問題の "level" がこの番号に対応します。どのレベルからでも挑戦できます。
 LEVELS = [
-    {"level": 1,  "title": "SELECT の基本", "desc": "全部のデータを取り出す・列を選ぶ・* の使い方"},
-    {"level": 2,  "title": "列の選び方と計算", "desc": "別の表・列の順番・別名(AS)・計算した列"},
-    {"level": 3,  "title": "WHERE で絞り込む", "desc": "条件で行を選ぶ・比較・NULL / NOT NULL"},
-    {"level": 4,  "title": "いろいろな条件①", "desc": "文字列・以下(<=)・等しくない(<>)・IN"},
-    {"level": 5,  "title": "いろいろな条件②", "desc": "AND/OR・LIKE・BETWEEN の組み合わせ"},
-    {"level": 6,  "title": "データの追加・更新・削除", "desc": "INSERT / UPDATE / DELETE（データ操作の基本）"},
-    {"level": 7,  "title": "並び替えと重複", "desc": "ORDER BY（昇順/降順）・DISTINCT・LIMIT"},
-    {"level": 8,  "title": "集計（GROUP BY）", "desc": "COUNT/SUM/AVG/MAX・GROUP BY・HAVING"},
-    {"level": 9,  "title": "CASE と関数", "desc": "CASE 式・条件分岐・日付のしぼり込み"},
-    {"level": 10, "title": "テーブル結合（JOIN）", "desc": "複数の表をつなぐ・名前（部署名）の組み立て"},
-    {"level": 11, "title": "サブクエリ", "desc": "クエリの中にクエリ・段階的な絞り込み"},
-    {"level": 12, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
+    {"level": 1,  "title": "SQL はじめの一歩", "desc": "まずはここから・SELECT で取り出す・* はすべての列"},
+    {"level": 2,  "title": "SELECT の基本", "desc": "全部のデータを取り出す・列を選ぶ・* の使い方"},
+    {"level": 3,  "title": "列の選び方と計算", "desc": "別の表・列の順番・別名(AS)・計算した列"},
+    {"level": 4,  "title": "WHERE で絞り込む", "desc": "条件で行を選ぶ・比較・NULL / NOT NULL"},
+    {"level": 5,  "title": "いろいろな条件①", "desc": "文字列・以下(<=)・等しくない(<>)・IN"},
+    {"level": 6,  "title": "いろいろな条件②", "desc": "AND/OR・LIKE・BETWEEN の組み合わせ"},
+    {"level": 7,  "title": "データの追加・更新・削除", "desc": "INSERT / UPDATE / DELETE（データ操作の基本）"},
+    {"level": 8,  "title": "並び替えと重複", "desc": "ORDER BY（昇順/降順）・DISTINCT・LIMIT"},
+    {"level": 9,  "title": "集計（GROUP BY）", "desc": "COUNT/SUM/AVG/MAX・GROUP BY・HAVING"},
+    {"level": 10,  "title": "CASE と関数", "desc": "CASE 式・条件分岐・日付のしぼり込み"},
+    {"level": 11, "title": "テーブル結合（JOIN）", "desc": "複数の表をつなぐ・名前（部署名）の組み立て"},
+    {"level": 12, "title": "サブクエリ", "desc": "クエリの中にクエリ・段階的な絞り込み"},
+    {"level": 13, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
 ]
 
 
@@ -56,7 +57,7 @@ PROBLEMS = [
             "- `>=` は「以上」。ちょうどの値も含みます"
         ),
         "topic": "SELECT と WHERE",
-        "level": 3,
+        "level": 4,
         "question": "月給（salary）が 30万円以上の社員の、名前（name）と月給（salary）を表示してください。",
         "answer_sql": "SELECT name, salary\nFROM employees\nWHERE salary >= 300000;",
         "choices": [
@@ -85,7 +86,7 @@ PROBLEMS = [
             "- `OR` なら「どちらか一方」でOK"
         ),
         "topic": "SELECT と WHERE",
-        "level": 5,
+        "level": 6,
         "question": "営業部（department_id が 1）で、月給（salary）が 30万円以上の社員の、名前（name）と月給（salary）を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -118,7 +119,7 @@ PROBLEMS = [
             "- 空かどうかは `=` ではなく `IS NULL` で調べる"
         ),
         "topic": "SELECT と WHERE",
-        "level": 3,
+        "level": 4,
         "question": "上司がいない（manager_id が NULL の）社員の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE manager_id IS NULL;",
         "choices": [
@@ -151,7 +152,7 @@ PROBLEMS = [
             "- `DESC`=大きい順、`ASC`（省略時）=小さい順"
         ),
         "topic": "並び替え・重複除去",
-        "level": 7,
+        "level": 8,
         "question": "社員を月給（salary）の高い順に並べ、名前（name）と月給（salary）を表示してください。",
         "answer_sql": "SELECT name, salary\nFROM employees\nORDER BY salary DESC;",
         "choices": [
@@ -179,7 +180,7 @@ PROBLEMS = [
             "- 書く場所は `SELECT` のすぐ後ろ"
         ),
         "topic": "並び替え・重複除去",
-        "level": 7,
+        "level": 8,
         "question": "商品（products）のカテゴリ（category）を、重複なしで一覧表示してください。",
         "answer_sql": "SELECT DISTINCT category\nFROM products;",
         "choices": [
@@ -207,7 +208,7 @@ PROBLEMS = [
             "- 「上位◯件」は並び替え＋件数しぼりのセット"
         ),
         "topic": "並び替え・重複除去",
-        "level": 7,
+        "level": 8,
         "question": "月給（salary）が高い順にトップ3の、名前（name）と月給（salary）を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -244,7 +245,7 @@ PROBLEMS = [
             "- `*` は「すべての行」"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 8,
+        "level": 9,
         "question": "社員の人数を数えてください。",
         "answer_sql": "SELECT COUNT(*) AS 人数\nFROM employees;",
         "choices": [
@@ -272,7 +273,7 @@ PROBLEMS = [
             "- `AVG`=平均（`SUM`=合計, `MAX`/`MIN`=最大/最小）"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 8,
+        "level": 9,
         "question": "部署（department_id）ごとの平均月給を、部署IDとあわせて表示してください。",
         "answer_sql": (
             "SELECT department_id, AVG(salary) AS 平均給料\n"
@@ -304,7 +305,7 @@ PROBLEMS = [
             "- `WHERE` はまとめる「前」の1行ずつにかける"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 8,
+        "level": 9,
         "question": "社員が 2人以上いる部署の、部署IDと人数を表示してください。",
         "answer_sql": (
             "SELECT department_id, COUNT(*) AS 人数\n"
@@ -342,7 +343,7 @@ PROBLEMS = [
             "- `ON A = B` でどの列どうしを一致させるか指定"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 10,
+        "level": 11,
         "question": "社員の名前（name）と、所属する部署の名前を表示してください。"
                     "（社員の表にある部署番号を、部署の表で名前に置きかえるイメージです。）",
         "answer_sql": (
@@ -379,7 +380,7 @@ PROBLEMS = [
             "- `COUNT(列名)` は NULL を数えない（0人を正しく出せる）"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 10,
+        "level": 11,
         "question": "すべての部署について、部署名と社員数を表示してください。社員が 0人の部署も 0と表示してください。",
         "answer_sql": (
             "SELECT departments.name AS 部署名, COUNT(employees.id) AS 人数\n"
@@ -414,7 +415,7 @@ PROBLEMS = [
             "- つなぐたびに `ON` で一致条件を指定する"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 10,
+        "level": 11,
         "question": "注文（orders）ごとに、担当社員の名前・商品名・数量（quantity）を表示してください。",
         "answer_sql": (
             "SELECT employees.name AS 担当者, products.name AS 商品名, orders.quantity AS 数量\n"
@@ -451,7 +452,7 @@ PROBLEMS = [
             "- 1つの値を返すサブクエリは `>` などで比較できる"
         ),
         "topic": "サブクエリ",
-        "level": 11,
+        "level": 12,
         "question": "全社員の平均月給より月給（salary）が高い社員の、名前（name）と月給（salary）を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -484,7 +485,7 @@ PROBLEMS = [
             "- `NOT IN (...)` … 一覧の「どれにも一致しない」"
         ),
         "topic": "サブクエリ",
-        "level": 11,
+        "level": 12,
         "question": "一度も注文（orders）を担当していない社員の名前（name）を表示してください。",
         "answer_sql": (
             "SELECT name\n"
@@ -517,7 +518,7 @@ PROBLEMS = [
             "- `department_id = e.department_id` で「同じ部署内」を指す"
         ),
         "topic": "サブクエリ",
-        "level": 11,
+        "level": 12,
         "question": "各部署で最も月給（salary）が高い社員の、部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT e.department_id, e.name, e.salary\n"
@@ -559,7 +560,7 @@ PROBLEMS = [
             "- `%` は「任意の文字0個以上」。`'%藤%'` で藤を含む"
         ),
         "topic": "文字列・日付の関数",
-        "level": 5,
+        "level": 6,
         "question": "名前（name）に『藤』を含む社員の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE name LIKE '%藤%';",
         "choices": [
@@ -587,7 +588,7 @@ PROBLEMS = [
             "- `>=` で「その日以降」"
         ),
         "topic": "文字列・日付の関数",
-        "level": 9,
+        "level": 10,
         "question": "2020年1月1日以降に入社した（hire_date）社員の、名前（name）と入社日（hire_date）を表示してください。",
         "answer_sql": (
             "SELECT name, hire_date\n"
@@ -619,7 +620,7 @@ PROBLEMS = [
             "- MySQL では `+` で文字はつなげない（`+` は計算になる）"
         ),
         "topic": "文字列・日付の関数",
-        "level": 10,
+        "level": 11,
         "question": "社員一覧を『佐藤（営業）』のように『名前（部署名）』の形の1列で表示してください。",
         "answer_sql": (
             "SELECT CONCAT(employees.name, '（', departments.name, '）') AS 表示名\n"
@@ -657,7 +658,7 @@ PROBLEMS = [
             "- 最後は必ず `END` で閉じる"
         ),
         "topic": "CASE 式と条件分岐",
-        "level": 9,
+        "level": 10,
         "question": "社員の名前（name）と月給（salary）に加え、月給が 40万円以上なら『高い』、そうでなければ『普通』と表示する列を作ってください。",
         "answer_sql": (
             "SELECT name, salary,\n"
@@ -692,7 +693,7 @@ PROBLEMS = [
             "- 条件は「大きい方から」書くと重なりを防げる"
         ),
         "topic": "CASE 式と条件分岐",
-        "level": 9,
+        "level": 10,
         "question": "社員の名前（name）と月給（salary）に加え、月給を『40万以上=A』『30万以上=B』『それ未満=C』で表示する列を作ってください。",
         "answer_sql": (
             "SELECT name, salary,\n"
@@ -729,7 +730,7 @@ PROBLEMS = [
             "- 1と0に置き換えて合計＝「1の個数」"
         ),
         "topic": "CASE 式と条件分岐",
-        "level": 9,
+        "level": 10,
         "question": "部署ごとに、月給が 40万円以上の社員の人数を数え、部署IDと人数を表示してください。",
         "answer_sql": (
             "SELECT department_id,\n"
@@ -768,7 +769,7 @@ PROBLEMS = [
             "- `OVER(...)` の中で「どう並べるか」を指定"
         ),
         "topic": "ウィンドウ関数",
-        "level": 12,
+        "level": 13,
         "question": "全社員に月給（salary）の高い順の順位を付け、名前・月給・順位を表示してください。",
         "answer_sql": (
             "SELECT name, salary,\n"
@@ -801,7 +802,7 @@ PROBLEMS = [
             "- `ORDER BY` で各グループ内の並び順を決める"
         ),
         "topic": "ウィンドウ関数",
-        "level": 12,
+        "level": 13,
         "question": "社員を部署ごとに分け、月給（salary）の高い順に順位を付けて、部署ID・名前・月給と部署内順位を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary,\n"
@@ -834,7 +835,7 @@ PROBLEMS = [
             "- `ROW_NUMBER()` は 1,2,3… の連番"
         ),
         "topic": "ウィンドウ関数",
-        "level": 12,
+        "level": 13,
         "question": "各部署で月給（salary）が最も高い社員（部署内1位）の、部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary\n"
@@ -877,7 +878,7 @@ PROBLEMS = [
             "- 条件（WHERE）を書かなければ全部の行が出る"
         ),
         "topic": "SELECT と WHERE",
-        "level": 1,
+        "level": 2,
         "question": "社員（employees）全員の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM employees;",
         "choices": [
@@ -905,7 +906,7 @@ PROBLEMS = [
             "- 表は必ず `FROM 表名` で指定する"
         ),
         "topic": "SELECT と WHERE",
-        "level": 1,
+        "level": 2,
         "question": "商品（products）の表から、すべての列・すべての行を表示してください。",
         "answer_sql": "SELECT *\nFROM products;",
         "choices": [
@@ -933,7 +934,7 @@ PROBLEMS = [
             "- SQL の「等しい」は `=`（`==` ではない）。数値はクォート不要"
         ),
         "topic": "SELECT と WHERE",
-        "level": 3,
+        "level": 4,
         "question": "営業部（department_id が 1）の社員の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE department_id = 1;",
         "choices": [
@@ -965,7 +966,7 @@ PROBLEMS = [
             "- 書いた順に左から表示される"
         ),
         "topic": "SELECT と WHERE",
-        "level": 1,
+        "level": 2,
         "question": "商品（products）の名前（name）と単価（price）を表示してください。",
         "answer_sql": "SELECT name, price\nFROM products;",
         "choices": [
@@ -993,7 +994,7 @@ PROBLEMS = [
             "- 表は必ず `FROM 表名` で指定する"
         ),
         "topic": "SELECT と WHERE",
-        "level": 2,
+        "level": 3,
         "question": "部署（departments）の表から、すべての列・すべての行を表示してください。",
         "answer_sql": "SELECT *\nFROM departments;",
         "choices": [
@@ -1020,7 +1021,7 @@ PROBLEMS = [
             "- 列の区切りはカンマ `,`"
         ),
         "topic": "SELECT と WHERE",
-        "level": 2,
+        "level": 3,
         "question": "社員（employees）の月給（salary）と名前（name）を、『月給 → 名前』の順で表示してください。",
         "answer_sql": "SELECT salary, name\nFROM employees;",
         "choices": [
@@ -1051,7 +1052,7 @@ PROBLEMS = [
             "- 数値はクォート不要だが、文字は必要"
         ),
         "topic": "SELECT と WHERE",
-        "level": 4,
+        "level": 5,
         "question": "カテゴリ（category）が「家具」の商品（products）の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM products\nWHERE category = '家具';",
         "choices": [
@@ -1078,7 +1079,7 @@ PROBLEMS = [
             "- 不等号は `<=` の順で書く（`=<` とは書かない）"
         ),
         "topic": "SELECT と WHERE",
-        "level": 4,
+        "level": 5,
         "question": "単価（price）が 2500円以下の商品（products）の名前（name）と単価（price）を表示してください。",
         "answer_sql": "SELECT name, price\nFROM products\nWHERE price <= 2500;",
         "choices": [
@@ -1109,7 +1110,7 @@ PROBLEMS = [
             "- 両方を満たす必要があるときは `AND`"
         ),
         "topic": "SELECT と WHERE",
-        "level": 5,
+        "level": 6,
         "question": "営業部（department_id が 1）、または月給（salary）が 40万円以上の社員の、名前（name）を表示してください。",
         "answer_sql": (
             "SELECT name\n"
@@ -1142,7 +1143,7 @@ PROBLEMS = [
             "- 文字と比べるので値は `' '` で囲む"
         ),
         "topic": "SELECT と WHERE",
-        "level": 4,
+        "level": 5,
         "question": "カテゴリ（category）が「文具」でない商品（products）の名前（name）とカテゴリ（category）を表示してください。",
         "answer_sql": "SELECT name, category\nFROM products\nWHERE category <> '文具';",
         "choices": [
@@ -1169,7 +1170,7 @@ PROBLEMS = [
             "- 範囲のときは `>=` と `<=` を2つ書くかわりに使える"
         ),
         "topic": "SELECT と WHERE",
-        "level": 5,
+        "level": 6,
         "question": "単価（price）が 1000円以上 30000円以下の商品（products）の、名前（name）と単価（price）を表示してください。",
         "answer_sql": (
             "SELECT name, price\n"
@@ -1205,7 +1206,7 @@ PROBLEMS = [
             "- 文字は `' '` で囲み、数値はそのまま書く"
         ),
         "topic": "データ操作（INSERT/UPDATE/DELETE）",
-        "level": 6,
+        "level": 7,
         "question": "部署（departments）に、id=5・name「総務」の行を1件追加してください。",
         "answer_sql": "INSERT INTO departments (id, name)\nVALUES (5, '総務');",
         "choices": [
@@ -1233,7 +1234,7 @@ PROBLEMS = [
             "- `WHERE` を付け忘れると、全部の行が変わってしまう"
         ),
         "topic": "データ操作（INSERT/UPDATE/DELETE）",
-        "level": 6,
+        "level": 7,
         "question": "社員（employees）の id が 3 の人の月給（salary）を 30万円（300000）に変更してください。",
         "answer_sql": "UPDATE employees\nSET salary = 300000\nWHERE id = 3;",
         "choices": [
@@ -1261,7 +1262,7 @@ PROBLEMS = [
             "- `WHERE` を付け忘れると、全部の行が消えてしまう"
         ),
         "topic": "データ操作（INSERT/UPDATE/DELETE）",
-        "level": 6,
+        "level": 7,
         "question": "注文（orders）の id が 10 の行を1件削除してください。",
         "answer_sql": "DELETE FROM orders\nWHERE id = 10;",
         "choices": [
@@ -1289,7 +1290,7 @@ PROBLEMS = [
             "- 1件のときと同じ `INSERT INTO` を使う"
         ),
         "topic": "データ操作（INSERT/UPDATE/DELETE）",
-        "level": 6,
+        "level": 7,
         "question": "商品（products）に2件追加してください。(id=7, name='付箋', category='文具', price=200) と (id=8, name='ホチキス', category='文具', price=500)。",
         "answer_sql": (
             "INSERT INTO products (id, name, category, price)\n"
@@ -1320,7 +1321,7 @@ PROBLEMS = [
             "- `SET 列 = 値` だと、その値で上書きしてしまう"
         ),
         "topic": "データ操作（INSERT/UPDATE/DELETE）",
-        "level": 6,
+        "level": 7,
         "question": "開発部（department_id が 2）の社員全員の月給（salary）を 1万円（10000）上げてください。",
         "answer_sql": (
             "UPDATE employees\n"
@@ -1355,7 +1356,7 @@ PROBLEMS = [
             "- 件数を数える `COUNT` とは役割が違う"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 8,
+        "level": 9,
         "question": "注文（orders）の数量（quantity）の合計を求めてください。",
         "answer_sql": "SELECT SUM(quantity)\nFROM orders;",
         "choices": [
@@ -1382,7 +1383,7 @@ PROBLEMS = [
             "- どちらも数値や日付の列に使える"
         ),
         "topic": "集計関数と GROUP BY",
-        "level": 8,
+        "level": 9,
         "question": "商品（products）の単価（price）の最大値を求めてください。",
         "answer_sql": "SELECT MAX(price)\nFROM products;",
         "choices": [
@@ -1413,7 +1414,7 @@ PROBLEMS = [
             "- 元の列名はそのまま、表示だけ変わる"
         ),
         "topic": "SELECT と WHERE",
-        "level": 2,
+        "level": 3,
         "question": "社員（employees）の名前（name）と月給（salary）を、salary の見出しを「月給」にして表示してください。",
         "answer_sql": "SELECT name, salary AS 月給\nFROM employees;",
         "choices": [
@@ -1440,7 +1441,7 @@ PROBLEMS = [
             "- 掛け算は `*`。計算した列には `AS` で名前を付けると分かりやすい"
         ),
         "topic": "SELECT と WHERE",
-        "level": 2,
+        "level": 3,
         "question": "社員（employees）の名前（name）と、年収（月給 × 12）を「年収」という見出しで表示してください。",
         "answer_sql": "SELECT name, salary * 12 AS 年収\nFROM employees;",
         "choices": [
@@ -1472,7 +1473,7 @@ PROBLEMS = [
             "- NULL には `=` や `!=` は使えない"
         ),
         "topic": "SELECT と WHERE",
-        "level": 3,
+        "level": 4,
         "question": "上司がいる（manager_id が NULL でない）社員の名前（name）を表示してください。",
         "answer_sql": "SELECT name\nFROM employees\nWHERE manager_id IS NOT NULL;",
         "choices": [
@@ -1503,7 +1504,7 @@ PROBLEMS = [
             "- `= 値1 OR = 値2 OR ...` を短く書ける"
         ),
         "topic": "SELECT と WHERE",
-        "level": 4,
+        "level": 5,
         "question": "営業部（department_id が 1）または人事部（department_id が 3）の社員の、名前（name）と部署ID（department_id）を表示してください。",
         "answer_sql": (
             "SELECT name, department_id\n"
@@ -1538,7 +1539,7 @@ PROBLEMS = [
             "- 大きい順にしたいときは `DESC`"
         ),
         "topic": "並び替え・重複除去",
-        "level": 7,
+        "level": 8,
         "question": "商品（products）を単価（price）の安い順に並べ、名前（name）と単価（price）を表示してください。",
         "answer_sql": "SELECT name, price\nFROM products\nORDER BY price ASC;",
         "choices": [
@@ -1556,6 +1557,122 @@ PROBLEMS = [
         "points": (
             "・昇順（小→大）は `ASC`、降順（大→小）は `DESC`。何も書かないと昇順になります。\n"
             "・並び替えは `ORDER BY`。`SORT BY` ではありません。`BY` の書き忘れにも注意。"
+        ),
+    },
+
+    # =====================================================================
+    # Lv1: SQL はじめの一歩（いちばんやさしい入門）
+    # =====================================================================
+    {
+        "id": 48,
+        "hint": (
+            "- `SELECT` … データを「取り出す」ことば\n"
+            "- `*` は「すべての列」、`FROM 表名` で表を指定する"
+        ),
+        "topic": "SQL はじめの一歩",
+        "level": 1,
+        "question": "employees（社員）テーブルの中身を、まるごと全部表示する SQL はどれでしょう？",
+        "answer_sql": "SELECT * FROM employees;",
+        "choices": [
+            "SELECT * FROM employees;",
+            "GET * FROM employees;",
+            "SHOW employees;",
+            "SELECT employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "データを取り出すときは、必ず `SELECT` で始めます。\n\n"
+            "・`SELECT *` … `*` は「すべての列」という意味です。\n"
+            "・`FROM employees` … どの表から取り出すかを指定します。\n\n"
+            "この2つを合わせて『社員の表から、全部の列を取り出す』になります。"
+        ),
+        "points": (
+            "・取り出しは `SELECT` です。`GET` や `SHOW` では取り出せません。\n"
+            "・表を指定する `FROM` を書き忘れると動きません。"
+        ),
+    },
+    {
+        "id": 49,
+        "hint": (
+            "- 取り出したい列の名前を `SELECT` の後ろに書く\n"
+            "- `FROM` の後ろには「表の名前」を書く"
+        ),
+        "topic": "SQL はじめの一歩",
+        "level": 1,
+        "question": "社員（employees）の名前（name）の列だけを表示する SQL はどれでしょう？",
+        "answer_sql": "SELECT name FROM employees;",
+        "choices": [
+            "SELECT name FROM employees;",
+            "SELECT name;",
+            "SELECT employees FROM name;",
+            "GET name FROM employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "`*`（すべての列）の代わりに列の名前を書くと、その列だけを取り出せます。\n\n"
+            "・`SELECT name` … 名前の列だけ\n"
+            "・`FROM employees` … 社員の表から\n\n"
+            "『どの列を／どの表から』の順で書くのが基本の形です。"
+        ),
+        "points": (
+            "・`SELECT` の後ろは『列の名前』、`FROM` の後ろは『表の名前』。場所を入れかえないように。\n"
+            "・`FROM` を省くと、どの表か分からずエラーになります。"
+        ),
+    },
+    {
+        "id": 50,
+        "hint": (
+            "- `FROM` の後ろに「使いたい表の名前」を書く\n"
+            "- すべての列は `*`"
+        ),
+        "topic": "SQL はじめの一歩",
+        "level": 1,
+        "question": "部署（departments）テーブルの中身を全部表示する SQL はどれでしょう？",
+        "answer_sql": "SELECT * FROM departments;",
+        "choices": [
+            "SELECT * FROM departments;",
+            "SELECT * FROM employees;",
+            "SELECT * departments;",
+            "SELECT departments;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "取り出す表は `FROM` の後ろで指定します。今回は部署の表なので `FROM departments` です。\n\n"
+            "・`SELECT *` … すべての列\n"
+            "・`FROM departments` … 部署の表から\n\n"
+            "表の名前をまちがえると、ちがうデータが出てきてしまいます。"
+        ),
+        "points": (
+            "・`FROM` の後ろの表の名前で『どの表を見るか』が決まります。\n"
+            "・`FROM` という言葉自体を省くと動きません（`SELECT * departments;` は誤り）。"
+        ),
+    },
+    {
+        "id": 51,
+        "hint": (
+            "- 「すべての列」は記号 `*`（アスタリスク）で表す\n"
+            "- `SELECT` のすぐ後ろに `*` を書く"
+        ),
+        "topic": "SQL はじめの一歩",
+        "level": 1,
+        "question": "商品（products）テーブルの、すべての列・すべての行を表示する SQL はどれでしょう？",
+        "answer_sql": "SELECT * FROM products;",
+        "choices": [
+            "SELECT * FROM products;",
+            "SELECT all FROM products;",
+            "SELECT # FROM products;",
+            "SELECT FROM products;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "「すべての列」を表す記号は `*`（アスタリスク）です。\n\n"
+            "・`SELECT *` … すべての列を取り出す\n"
+            "・`FROM products` … 商品の表から\n\n"
+            "`all` や `#` ではなく、`*` を使うのがルールです。"
+        ),
+        "points": (
+            "・「全部の列」は `*` の1文字で表します。\n"
+            "・`SELECT` の後ろに何も書かない（`SELECT FROM ...`）のは誤り。必ず列か `*` を書きます。"
         ),
     },
 ]

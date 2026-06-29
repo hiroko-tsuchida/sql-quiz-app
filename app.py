@@ -4,7 +4,7 @@
     streamlit run app.py
 
 遊び方:
-    - レベルは全部で12。どのレベルからでも自由に選んで挑戦できる。
+    - レベルは全部で13。どのレベルからでも自由に選んで挑戦できる。
     - 各問題は3択。正しい SQL を選んで「答え合わせ」する。
     - レベルの問題を最後まで解くと、点数と間違えた問題が出る。
     - 間違えた問題は「もう一度」で再挑戦。全問正解すると【合格】。
@@ -31,7 +31,7 @@ from quiz_logic import (
 
 st.set_page_config(page_title="SQL 問題集（MySQL）", page_icon="🗃️", layout="wide")
 
-MAX_LEVEL = len(LEVELS)  # レベル総数（現在は 12）
+MAX_LEVEL = len(LEVELS)  # レベル総数（現在は 13）
 _BY_ID = {p["id"]: p for p in PROBLEMS}  # id から問題を引く辞書
 _LEVEL_INFO = {d["level"]: d for d in LEVELS}  # level から {title, desc} を引く
 
@@ -266,7 +266,7 @@ if ss.ended:
 # サイドバー：レベル選択と進捗
 # =============================================================================
 st.sidebar.title("🗃️ SQL 問題集")
-st.sidebar.caption("MySQL の書き方で学ぶ・Lv1〜Lv12")
+st.sidebar.caption("MySQL の書き方で学ぶ・Lv1〜Lv13")
 
 st.sidebar.subheader("レベルを選ぶ")
 # レベルボタンのラベルを左寄せにする（Streamlit の既定は中央寄せ）。
