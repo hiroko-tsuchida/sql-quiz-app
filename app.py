@@ -407,14 +407,14 @@ def render_question(problem: dict):
         unsafe_allow_html=True,
     )
 
+    # 実行結果はヒントの上に表示する（答え合わせ後のみ）
+    if ss.answered:
+        render_answer_result(problem)
+
     # ヒント（構文の意味）。見なくても解けるよう、たたんで表示する。
     if problem.get("hint"):
         with st.expander("💡 ヒントを見る（構文の意味）"):
             st.markdown(problem["hint"])
-
-    # 実行結果はヒントの直下に表示する（答え合わせ後のみ）
-    if ss.answered:
-        render_answer_result(problem)
 
     choices, correct_index = three_choices(problem, seed=choice_seed(problem))
     labels = [chr(ord("A") + i) for i in range(len(choices))]
