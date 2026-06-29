@@ -362,13 +362,11 @@ def render_answer_result(problem: dict):
     try:
         result = runner.run_sql(problem["answer_sql"])
     except Exception:
-        st.markdown("#### ▶️ 実行結果")
         st.caption("（この SQL の実行結果は表示できませんでした）")
         return
 
     # 実行結果の表は最大 3 行まで表示する（多いときは先頭だけ見せる）。
     max_rows = 3
-    st.markdown("#### ▶️ 実行結果")
     if result["kind"] == "select":
         df = result["df"]
         if df.empty:
@@ -407,8 +405,9 @@ def render_question(problem: dict):
         unsafe_allow_html=True,
     )
 
-    # 実行結果はヒントの上に表示する（答えを選ぶ前から表示する）
-    render_answer_result(problem)
+    # 実行結果はヒントの上に、折りたたみで表示する（答えを選ぶ前から見られる）
+    with st.expander("▶️ 実行結果を見る"):
+        render_answer_result(problem)
 
     # ヒント（構文の意味）。見なくても解けるよう、たたんで表示する。
     if problem.get("hint"):
