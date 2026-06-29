@@ -4,7 +4,7 @@
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://sql-quiz-app-gwxtxysinus2s8fmtnappae.streamlit.app/)
 
-SQL を **やさしいレベルから順番に** 学べる、4択クイズ形式の学習アプリです。
+SQL を **やさしいレベルから順番に** 学べる、3択クイズ形式の学習アプリです。
 レベルを1つずつ攻略していく「ステージ制」で、各問題は **正しい SQL（MySQL 構文）を
 4つの選択肢から選ぶ** 形式。答え合わせをすると、**やさしい日本語の解説** と
 **よくある間違い** が表示されます。
