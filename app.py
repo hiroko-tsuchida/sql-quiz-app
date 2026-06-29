@@ -340,7 +340,10 @@ st.markdown(
 )
 
 # --- テーブル定義とサンプルデータ（折りたたみ）-------------------------------
-with st.expander("📋 テーブル定義とサンプルデータを見る", expanded=False):
+with st.expander(
+    "📋 テーブル（departments, employees, products, orders）定義とサンプルデータを見る",
+    expanded=False,
+):
     st.caption("問題はこのデータベースを題材にしています。いつでもここで確認できます。")
     st.code(schema.CREATE_STATEMENTS, language="sql")
     for table_name, df in schema.TABLES.items():
