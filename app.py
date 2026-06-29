@@ -407,9 +407,8 @@ def render_question(problem: dict):
         unsafe_allow_html=True,
     )
 
-    # 実行結果はヒントの上に表示する（答え合わせ後のみ）
-    if ss.answered:
-        render_answer_result(problem)
+    # 実行結果はヒントの上に表示する（答えを選ぶ前から表示する）
+    render_answer_result(problem)
 
     # ヒント（構文の意味）。見なくても解けるよう、たたんで表示する。
     if problem.get("hint"):
@@ -419,13 +418,16 @@ def render_question(problem: dict):
     choices, correct_index = three_choices(problem, seed=choice_seed(problem))
     labels = [chr(ord("A") + i) for i in range(len(choices))]
 
-    for label, sql in zip(labels, choices):
-        st.markdown(f"**{label}**")
-        st.code(sql, language="sql")
-
+    st.markdown("#### 選択肢")
     # key にラウンド番号を含め、毎ラウンド・各問題でラジオを独立させる
     radio_key = f"choice_{problem['id']}_{ss.round_id}"
-    st.radio("あなたの答え", labels, key=radio_key, horizontal=True)
+    # ラジオ（A/B/C）を左に、対応する SQL を右に並べて表示する
+    col_radio, col_sql = st.columns([1, 9])
+    with col_radio:
+        st.radio("あなたの答え", labels, key=radio_key, label_visibility="collapsed")
+    with col_sql:
+        for sql in choices:
+            st.code(sql, language="sql")
 
     if not ss.answered:
         # まだ答え合わせ前：答え合わせボタンだけ出す
