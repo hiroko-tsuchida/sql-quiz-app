@@ -407,12 +407,6 @@ def render_question(problem: dict):
     choices, correct_index = three_choices(problem, seed=choice_seed(problem))
     labels = [chr(ord("A") + i) for i in range(len(choices))]
 
-    # 「選択肢…」の見出し。通常の #### (h4 約1.5rem) の半分くらいの大きさにする。
-    st.markdown(
-        "<h4 style='font-size: 0.75rem; font-weight: 700; margin: 0.5rem 0 0.25rem 0;'>"
-        "選択肢（正しい SQL を1つ選んでください）</h4>",
-        unsafe_allow_html=True,
-    )
     for label, sql in zip(labels, choices):
         st.markdown(f"**{label}**")
         st.code(sql, language="sql")
