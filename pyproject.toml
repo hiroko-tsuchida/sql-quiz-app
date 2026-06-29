@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+# tests/ から project 直下の problems.py / quiz_logic.py を import できるようにする
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 88

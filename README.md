@@ -22,7 +22,7 @@ SQL を **やさしいレベルから順番に** 学べる、4択クイズ形式
   **「もう一度」** で再挑戦でき、**全問正解で合格**
 - **構文のヒント**：各問題に「💡 ヒントを見る（構文の意味）」を用意（見なくても解ける）
 - **レベルごとの点数** をサイドバーに表示
-- 全 27 問。すべてに段階的な解説とヒント付き
+- 全 47 問。すべてに段階的な解説とヒント付き
 
 ## 題材のテーブル
 
@@ -52,17 +52,32 @@ streamlit run app.py
 
 ```
 sql-quiz-app/
-├── app.py            # Streamlit 本体（画面・レベル攻略の流れ）
-├── problems.py       # 問題データ（27問）とレベルの定義
-├── schema.py         # テーブル定義とサンプルデータ
-├── requirements.txt  # 依存パッケージ
-└── README.md         # このファイル
+├── app.py                 # Streamlit 本体（画面・レベル攻略の流れ）
+├── quiz_logic.py          # 画面に依存しない純粋ロジック（出題・進捗の保存/復元）
+├── problems.py            # 問題データ（47問）とレベルの定義
+├── schema.py              # テーブル定義とサンプルデータ
+├── tests/                 # pytest によるテスト（純関数 + 問題データの整合性）
+├── requirements.txt       # 依存パッケージ
+├── requirements-dev.txt   # 開発・テスト用の追加パッケージ
+└── README.md              # このファイル
+```
+
+## テスト
+
+純粋ロジック（`quiz_logic.py`）と、問題データ（`problems.py`）の整合性を
+pytest で検証しています。データ検証では「`answer_sql` が正解の選択肢と一致するか」
+「`id` の重複が無いか」「全レベルに問題があるか」などを47問すべてについて自動チェックします。
+
+```bash
+pip install -r requirements-dev.txt
+pytest
 ```
 
 ## カスタマイズ
 
 - **問題を追加する**：`problems.py` の `PROBLEMS` に辞書を1つ足すだけです。
-  `id` / `topic` / `level`(1〜5) / `question` / `hint` / `choices`(4つ) /
+  `id` / `topic` / `level`(1〜12) / `question` / `hint` / `choices`(4つ) /
   `answer_index` / `answer_sql` / `explanation` / `points` を埋めてください。
+  追加後は `pytest` を実行すると、データの書き間違いをまとめて確認できます。
 - **レベルを変える**：`problems.py` の `LEVELS`（タイトル・説明）を編集します。
 - **題材データを変える**：`schema.py` の各 DataFrame と `CREATE_STATEMENTS` を編集します。

@@ -21,11 +21,17 @@ import streamlit.components.v1 as components
 
 import schema
 from problems import LEVELS, PROBLEMS
+from quiz_logic import (
+    deserialize_progress,
+    problems_for_level,
+    serialize_progress,
+    three_choices,
+)
 
 st.set_page_config(page_title="SQL 問題集（MySQL）", page_icon="🗃️", layout="wide")
 
-MAX_LEVEL = len(LEVELS)                        # 5
-_BY_ID = {p["id"]: p for p in PROBLEMS}        # id から問題を引く辞書
+MAX_LEVEL = len(LEVELS)  # レベル総数（現在は 12）
+_BY_ID = {p["id"]: p for p in PROBLEMS}  # id から問題を引く辞書
 _LEVEL_INFO = {d["level"]: d for d in LEVELS}  # level から {title, desc} を引く
 
 # 進捗の自動保存はブラウザの localStorage に行う（ユーザーごとに保存される）。
@@ -34,100 +40,49 @@ STORAGE_ENABLED = os.environ.get("SQLQUIZ_NO_STORAGE") != "1"
 PROGRESS_KEY = "sqlquiz_progress"
 
 
-def problems_for_level(level: int):
-    """その level の問題を id 順で返す。"""
-    return [p for p in PROBLEMS if p["level"] == level]
-
-
-def three_choices(problem: dict):
-    """4つの選択肢から誤答を1つ減らして「3択」にする。
-
-    データ（problems.py）は正解1つ＋誤答3つの4択のまま保持し、
-    出題時にここで3択へ縮める（最後の誤答を1つ落とす）。
-    戻り値: (3つの選択肢リスト, その中での正解の位置)
-    """
-    choices = problem["choices"]
-    correct = problem["answer_index"]
-    wrong_indices = [i for i in range(len(choices)) if i != correct]
-    drop = wrong_indices[-1]  # 最後の誤答を1つ落とす
-    kept = [i for i in range(len(choices)) if i != drop]
-    return [choices[i] for i in kept], kept.index(correct)
-
-
 # 進捗として保存する session_state のキー。
 # メタ進捗（解放/合格/点数）に加えて「途中の攻略状態」も保存することで、
 # 1問ごとにチェックポイント保存し、次回は途中の問題から再開できる。
 PERSIST_KEYS = [
-    "unlocked", "passed", "level_score", "selected_level",
-    "active", "finished", "round_level", "queue", "pos", "wrong",
-    "answered", "last_correct", "is_first_round", "first_correct", "round_id",
+    "unlocked",
+    "passed",
+    "level_score",
+    "selected_level",
+    "active",
+    "finished",
+    "round_level",
+    "queue",
+    "pos",
+    "wrong",
+    "answered",
+    "last_correct",
+    "is_first_round",
+    "first_correct",
+    "round_id",
 ]
-
-
-# --- 進捗の保存／復元用（純関数なので単体テストしやすい）-----------------------
-def serialize_progress(s: dict) -> dict:
-    """session_state のスナップショット(dict)を JSON 化できる形にする。"""
-    return {
-        "unlocked": int(s["unlocked"]),
-        "passed": sorted(int(x) for x in s["passed"]),
-        "level_score": {str(k): list(v) for k, v in s["level_score"].items()},
-        "selected_level": int(s["selected_level"]),
-        "active": bool(s["active"]),
-        "finished": bool(s["finished"]),
-        "round_level": int(s["round_level"]),
-        "queue": [int(x) for x in s["queue"]],
-        "pos": int(s["pos"]),
-        "wrong": sorted(int(x) for x in s["wrong"]),
-        "answered": bool(s["answered"]),
-        "last_correct": bool(s["last_correct"]),
-        "is_first_round": bool(s["is_first_round"]),
-        "first_correct": int(s["first_correct"]),
-        "round_id": int(s["round_id"]),
-    }
-
-
-def deserialize_progress(d: dict) -> dict:
-    """保存された dict を session_state に入れられる形(型)に復元する。"""
-    return {
-        "unlocked": int(d.get("unlocked", 1)),
-        "passed": set(int(x) for x in d.get("passed", [])),
-        "level_score": {int(k): tuple(v) for k, v in d.get("level_score", {}).items()},
-        "selected_level": int(d.get("selected_level", 1)),
-        "active": bool(d.get("active", False)),
-        "finished": bool(d.get("finished", False)),
-        "round_level": int(d.get("round_level", 1)),
-        "queue": [int(x) for x in d.get("queue", [])],
-        "pos": int(d.get("pos", 0)),
-        "wrong": set(int(x) for x in d.get("wrong", [])),
-        "answered": bool(d.get("answered", False)),
-        "last_correct": bool(d.get("last_correct", False)),
-        "is_first_round": bool(d.get("is_first_round", True)),
-        "first_correct": int(d.get("first_correct", 0)),
-        "round_id": int(d.get("round_id", 0)),
-    }
 
 
 # =============================================================================
 # セッション状態（アプリが覚えておく値）の初期化
 # =============================================================================
 DEFAULTS = {
-    "unlocked": 1,        # 解放済みの最高レベル
+    "unlocked": 1,  # 解放済みの最高レベル
     "selected_level": 1,  # いま画面で見ているレベル
-    "passed": set(),      # 合格したレベルの集合
-    "level_score": {},    # {level: (初回正解数, 問題数)}
+    "passed": set(),  # 合格したレベルの集合
+    "level_score": {},  # {level: (初回正解数, 問題数)}
     # --- 1ラウンド分の攻略状態 ---
-    "active": False,      # 攻略中（問題を解いている最中）か
-    "finished": False,    # ラウンドを解き終えて結果画面を表示中か
-    "queue": [],          # このラウンドで解く問題 id のリスト
-    "pos": 0,             # いまラウンド内の何問目か
-    "wrong": set(),       # このラウンドで間違えた id
-    "answered": False,    # 今の問題を答え合わせ済みか
+    "active": False,  # 攻略中（問題を解いている最中）か
+    "finished": False,  # ラウンドを解き終えて結果画面を表示中か
+    "queue": [],  # このラウンドで解く問題 id のリスト
+    "pos": 0,  # いまラウンド内の何問目か
+    "wrong": set(),  # このラウンドで間違えた id
+    "answered": False,  # 今の問題を答え合わせ済みか
     "last_correct": False,  # 今の問題が正解だったか
-    "round_level": 1,     # このラウンドが属するレベル
+    "round_level": 1,  # このラウンドが属するレベル
     "is_first_round": True,  # 初回ラウンド（点数を記録する）か
-    "first_correct": 0,   # 初回ラウンドの正解数
-    "round_id": 0,        # ラジオの key を毎ラウンド変えるための通し番号
-    "ended": False,       # 「今日はここまで」で終了画面を表示中か
+    "first_correct": 0,  # 初回ラウンドの正解数
+    "round_id": 0,  # ラジオの key を毎ラウンド変えるための通し番号
+    "ended": False,  # 「今日はここまで」で終了画面を表示中か
 }
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
@@ -194,9 +149,19 @@ def start_round(level: int, ids: list, is_first: bool):
     ss.round_id += 1
 
 
+def choice_seed(problem: dict) -> str:
+    """選択肢シャッフル用のシード。ラウンドと問題で固定し、再実行でも並びを保つ。
+
+    出題画面（render_question）と採点（check_answer）でこの同じシードを使うことで、
+    両者の3択の並びが必ず一致し、判定がズレない。round_id はラウンドごとに
+    増えるので、同じ問題でも再挑戦すると別の並びになる。
+    """
+    return f"{ss.round_id}:{problem['id']}"
+
+
 def check_answer(problem: dict, radio_key: str):
     """『答え合わせ』ボタン。選んだ選択肢を採点する（3択）。"""
-    _, correct_index = three_choices(problem)
+    _, correct_index = three_choices(problem, seed=choice_seed(problem))
     chosen_label = ss[radio_key]
     chosen_index = ord(chosen_label) - ord("A")
     is_correct = chosen_index == correct_index
@@ -261,7 +226,9 @@ def render_progress_donut(container):
             theta=alt.Theta("レベル数:Q", stack=True),
             color=alt.Color(
                 "区分:N",
-                scale=alt.Scale(domain=["合格", "未合格"], range=["#2E7D32", "#E0E0E0"]),
+                scale=alt.Scale(
+                    domain=["合格", "未合格"], range=["#2E7D32", "#E0E0E0"]
+                ),
                 legend=alt.Legend(title=None, orient="bottom"),
             ),
             order=alt.Order("区分:N"),
@@ -386,7 +353,7 @@ info = _LEVEL_INFO[level]
 
 
 def render_question(problem: dict):
-    """1問分の出題・答え合わせ・解説を表示する（4択）。"""
+    """1問分の出題・答え合わせ・解説を表示する（3択）。"""
     total = len(ss.queue)
     st.caption(
         f"このラウンド：問題 {ss.pos + 1} / {total}　｜　項目: {problem['topic']}"
@@ -404,7 +371,7 @@ def render_question(problem: dict):
         with st.expander("💡 ヒントを見る（構文の意味）"):
             st.markdown(problem["hint"])
 
-    choices, correct_index = three_choices(problem)
+    choices, correct_index = three_choices(problem, seed=choice_seed(problem))
     labels = [chr(ord("A") + i) for i in range(len(choices))]
 
     # 「選択肢…」の見出し。通常の #### (h4 約1.5rem) の半分くらいの大きさにする。
@@ -510,7 +477,9 @@ def render_result():
 
         if lv < MAX_LEVEL:
             next_info = _LEVEL_INFO[lv + 1]
-            st.write(f"次は **Lv{lv + 1}（{next_info['title']}）** に挑戦してみましょう。")
+            st.write(
+                f"次は **Lv{lv + 1}（{next_info['title']}）** に挑戦してみましょう。"
+            )
             st.button(
                 f"Lv{lv + 1} へ進む →",
                 type="primary",
@@ -521,7 +490,9 @@ def render_result():
             st.success("🏆 全12レベルを制覇しました！おめでとうございます！")
     else:
         # --- まだ間違いが残っている ---
-        st.warning(f"あと {len(wrong)} 問。間違えた問題をもう一度解いて、全問正解を目指しましょう。")
+        st.warning(
+            f"あと {len(wrong)} 問。間違えた問題をもう一度解いて、全問正解を目指しましょう。"
+        )
         st.markdown("#### ❌ 間違えた問題")
         for pid in sorted(wrong):
             st.write(f"・{_BY_ID[pid]['question']}")
