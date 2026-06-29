@@ -25,20 +25,25 @@ def three_choices(problem: dict, seed=None):
     データ（problems.py）は正解1つ＋誤答3つの4択のまま保持し、
     出題時にここで3択へ縮める（最後の誤答を1つ落とす）。
 
-    seed を渡すと、その値に応じて3択の並びをシャッフルする。
-    同じ seed なら必ず同じ並びになる（＝再実行されても並びが変わらない）ので、
+    seed を渡すと、その値に応じて「落とす誤答」と「3択の並び」の両方を決める。
+    同じ seed なら必ず同じ結果になる（＝再実行されても変わらない）ので、
     出題画面と採点（check_answer）で seed をそろえれば判定がズレない。
-    seed=None のときはシャッフルせず元の順序のまま返す。
+    seed を変えると、落ちる誤答も並びも変わるため出題に変化が出る。
+    seed=None のときは最後の誤答を落とし、シャッフルもせず元の順序のまま返す。
 
     戻り値: (3つの選択肢リスト, その中での正解の位置)
     """
     choices = problem["choices"]
     correct = problem["answer_index"]
     wrong_indices = [i for i in range(len(choices)) if i != correct]
-    drop = wrong_indices[-1]  # 最後の誤答を1つ落とす
+    rng = random.Random(seed) if seed is not None else None
+    if rng is not None:
+        drop = rng.choice(wrong_indices)  # 落とす誤答も seed で選ぶ
+    else:
+        drop = wrong_indices[-1]  # seed なしは最後の誤答を落とす（従来どおり）
     kept = [i for i in range(len(choices)) if i != drop]
-    if seed is not None:
-        random.Random(seed).shuffle(kept)
+    if rng is not None:
+        rng.shuffle(kept)
     return [choices[i] for i in kept], kept.index(correct)
 
 
