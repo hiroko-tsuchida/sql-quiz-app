@@ -19,6 +19,7 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
+import runner
 import schema
 from problems import LEVELS, PROBLEMS
 from quiz_logic import (
@@ -352,6 +353,38 @@ level = ss.selected_level
 info = _LEVEL_INFO[level]
 
 
+def render_answer_result(problem: dict):
+    """正解 SQL を実際に実行して、その出力結果（表）を表示する。
+
+    SELECT は結果の表をそのまま、INSERT/UPDATE/DELETE は『実行後のテーブル』を
+    表示する。実行に失敗しても画面が止まらないよう、失敗時は注意書きだけ出す。
+    """
+    try:
+        result = runner.run_sql(problem["answer_sql"])
+    except Exception:
+        st.markdown("#### ▶️ 実行結果")
+        st.caption("（この SQL の実行結果は表示できませんでした）")
+        return
+
+    st.markdown("#### ▶️ 実行結果")
+    if result["kind"] == "select":
+        df = result["df"]
+        if df.empty:
+            st.caption("条件にあう行はありません（0 件）。")
+        else:
+            st.dataframe(df, hide_index=True, use_container_width=True)
+            st.caption(f"{len(df)} 件")
+    else:
+        # INSERT / UPDATE / DELETE：実行後のテーブルの中身を見せる
+        table = result["table"]
+        st.caption(
+            f"この SQL は {table} テーブルを変更します（{result['rowcount']} 行）。"
+            f"実行後の {table} テーブルは次のとおりです。"
+        )
+        if result["df"] is not None:
+            st.dataframe(result["df"], hide_index=True, use_container_width=True)
+
+
 def render_question(problem: dict):
     """1問分の出題・答え合わせ・解説を表示する（3択）。"""
     total = len(ss.queue)
@@ -406,6 +439,7 @@ def render_question(problem: dict):
 
         st.markdown("#### ✅ 正解の SQL（MySQL）")
         st.code(problem["answer_sql"], language="sql")
+        render_answer_result(problem)
         st.markdown("#### 📖 解説")
         st.write(problem["explanation"])
         if problem.get("points"):
