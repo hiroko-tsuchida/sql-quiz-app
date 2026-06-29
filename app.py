@@ -315,18 +315,20 @@ for info in LEVELS:
         args=(lv,),
     )
 
-# レベルごとの点数
+# 進捗状況
 st.sidebar.divider()
-st.sidebar.subheader("レベルごとの点数")
+st.sidebar.subheader("進捗状況")
 for info in LEVELS:
     lv = info["level"]
     score = ss.level_score.get(lv)
-    status = "（未挑戦）"
-    if score is not None:
+    if score is None:
+        # まだ一度も解いていないレベル
+        status = "未挑戦"
+    else:
+        # 一度でも解いたレベルは「正解数／問題数」と状態を出す
         correct, total = score
-        status = f"{correct} / {total} 点"
-    if lv in ss.passed:
-        status += "　🎉合格"
+        mark = "✅合格" if lv in ss.passed else "🔄挑戦中"
+        status = f"{correct}/{total}問 {mark}"
     st.sidebar.write(f"Lv{lv}：{status}")
 
 st.sidebar.divider()
@@ -489,7 +491,7 @@ def render_result():
     score = ss.level_score.get(lv)
     if score is not None:
         correct, score_total = score
-        st.metric("このレベルの点数", f"{correct} / {score_total} 点")
+        st.metric("このレベルの正解数", f"{correct} / {score_total} 問")
 
     if not wrong:
         # --- 合格 ---
