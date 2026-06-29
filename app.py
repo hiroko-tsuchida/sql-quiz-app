@@ -187,6 +187,11 @@ def go_next():
         # 初回ラウンドの結果を、このレベルの点数として記録する
         if ss.is_first_round:
             ss.level_score[ss.round_level] = (ss.first_correct, len(ss.queue))
+        # 間違いを直し切って全問正解（＝合格）したら、点数を満点に更新する。
+        # 「間違えた問題をもう一度」での再挑戦でもここで反映される。
+        if not ss.wrong:
+            full = len(problems_for_level(ss.round_level))
+            ss.level_score[ss.round_level] = (full, full)
 
 
 def reset_progress():
@@ -484,7 +489,7 @@ def render_result():
     score = ss.level_score.get(lv)
     if score is not None:
         correct, score_total = score
-        st.metric("このレベルの点数（初回）", f"{correct} / {score_total} 点")
+        st.metric("このレベルの点数", f"{correct} / {score_total} 点")
 
     if not wrong:
         # --- 合格 ---
