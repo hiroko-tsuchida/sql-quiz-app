@@ -442,12 +442,8 @@ def render_question(problem: dict):
         st.markdown("#### ✅ 正解の SQL（MySQL）")
         st.code(problem["answer_sql"], language="sql")
         render_answer_result(problem)
-        st.markdown("#### 📖 解説")
-        st.write(problem["explanation"])
-        if problem.get("points"):
-            st.markdown("#### 💡 ポイント / よくある間違い")
-            st.info(problem["points"])
 
+        # 「次の問題」「今日はここまで」は解説の上に置く
         is_last = ss.pos >= len(ss.queue) - 1
         col_next, col_end = st.columns(2)
         with col_next:
@@ -463,6 +459,12 @@ def render_question(problem: dict):
                 on_click=end_session,
                 use_container_width=True,
             )
+
+        st.markdown("#### 📖 解説")
+        st.write(problem["explanation"])
+        if problem.get("points"):
+            st.markdown("#### 💡 ポイント / よくある間違い")
+            st.info(problem["points"])
 
 
 def render_result():
