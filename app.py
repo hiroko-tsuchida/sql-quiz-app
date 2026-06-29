@@ -332,7 +332,7 @@ for info in LEVELS:
     st.sidebar.write(f"Lv{lv}：{status}")
 
 st.sidebar.divider()
-st.sidebar.subheader("合格したレベル")
+st.sidebar.subheader("全体の進捗情報")
 render_progress_donut(st.sidebar)
 st.sidebar.button("進捗をリセット", on_click=reset_progress)
 
