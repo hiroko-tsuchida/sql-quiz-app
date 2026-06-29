@@ -377,14 +377,17 @@ def render_answer_result(problem: dict):
         return
 
     # 実行結果の表は最大 3 行まで表示する（多いときは先頭だけ見せる）。
+    # ただし Lv7（データの追加・更新・削除）だけは、変更の影響が分かるよう全行を出す。
     max_rows = 3
+    show_all = problem["level"] == 7
     if result["kind"] == "select":
         df = result["df"]
         if df.empty:
             st.caption("条件にあう行はありません（0 件）。")
         else:
-            st.dataframe(df.head(max_rows), hide_index=True, use_container_width=True)
-            if len(df) > max_rows:
+            shown = df if show_all else df.head(max_rows)
+            st.dataframe(shown, hide_index=True, use_container_width=True)
+            if len(df) > max_rows and not show_all:
                 st.caption(f"{len(df)} 件中 先頭 {max_rows} 件を表示")
             else:
                 st.caption(f"{len(df)} 件")
@@ -397,8 +400,9 @@ def render_answer_result(problem: dict):
         )
         if result["df"] is not None:
             df = result["df"]
-            st.dataframe(df.head(max_rows), hide_index=True, use_container_width=True)
-            if len(df) > max_rows:
+            shown = df if show_all else df.head(max_rows)
+            st.dataframe(shown, hide_index=True, use_container_width=True)
+            if len(df) > max_rows and not show_all:
                 st.caption(f"{len(df)} 件中 先頭 {max_rows} 件を表示")
 
 
