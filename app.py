@@ -554,6 +554,11 @@ def render_result():
             on_click=start_round,
             args=(lv, sorted(wrong), False),
         )
+        st.button(
+            "🌙 今日はここまで",
+            key="end_from_result",
+            on_click=end_session,
+        )
 
     st.divider()
     st.button(
