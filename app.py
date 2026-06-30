@@ -299,7 +299,7 @@ for info in LEVELS:
         label,
         key=f"lv_{lv}",
         type="primary" if lv == ss.selected_level else "secondary",
-        use_container_width=True,
+        width="stretch",
         on_click=select_level,
         args=(lv,),
     )
@@ -343,7 +343,7 @@ with st.expander(
     st.code(schema.CREATE_STATEMENTS, language="sql")
     for table_name, df in schema.TABLES.items():
         st.markdown(f"**{table_name}**")
-        st.dataframe(df, hide_index=True, use_container_width=True)
+        st.dataframe(df, hide_index=True, width="stretch")
 
 st.divider()
 
@@ -373,7 +373,7 @@ def render_answer_result(problem: dict):
             st.caption("条件にあう行はありません（0 件）。")
         else:
             shown = df if show_all else df.head(max_rows)
-            st.dataframe(shown, hide_index=True, use_container_width=True)
+            st.dataframe(shown, hide_index=True, width="stretch")
             if len(df) > max_rows and not show_all:
                 st.caption(f"{len(df)} 件中 先頭 {max_rows} 件を表示")
             else:
@@ -388,7 +388,7 @@ def render_answer_result(problem: dict):
         if result["df"] is not None:
             df = result["df"]
             shown = df if show_all else df.head(max_rows)
-            st.dataframe(shown, hide_index=True, use_container_width=True)
+            st.dataframe(shown, hide_index=True, width="stretch")
             if len(df) > max_rows and not show_all:
                 st.caption(f"{len(df)} 件中 先頭 {max_rows} 件を表示")
 
@@ -459,27 +459,27 @@ def render_question(problem: dict):
                     "間違えた問題をもう一度 🔁",
                     type="primary",
                     on_click=retry_wrong_now,
-                    use_container_width=True,
+                    width="stretch",
                 )
             else:
                 st.button(
                     "結果を見る" if is_last else "次の問題",
                     type="primary",
                     on_click=go_next,
-                    use_container_width=True,
+                    width="stretch",
                 )
         with col_end:
             st.button(
                 "🌙 今日はここまで",
                 on_click=end_session,
-                use_container_width=True,
+                width="stretch",
             )
         if has_wrong:
             # 正解数や間違いの一覧をまとめて見たい人向けに、結果画面も残す
             st.button(
                 "結果を見る（正解数・間違いの一覧）",
                 on_click=go_next,
-                use_container_width=True,
+                width="stretch",
             )
 
         st.markdown("#### 📖 解説")
