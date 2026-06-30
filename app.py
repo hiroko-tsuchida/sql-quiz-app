@@ -289,6 +289,11 @@ if ss.ended:
 st.sidebar.title("🗃️ SQL 問題集")
 st.sidebar.caption(f"MySQL の書き方で学ぶ・Lv1〜Lv{MAX_LEVEL}")
 
+# 全体の達成率（合格レベル数のドーナツ）を、レベル選択ボタンの上に表示する
+st.sidebar.subheader("全体の進捗情報")
+render_progress_donut(st.sidebar)
+st.sidebar.divider()
+
 st.sidebar.subheader("レベルを選ぶ")
 # レベルボタンのラベルを左寄せにする（Streamlit の既定は中央寄せ）。
 # ボタン本体・内側のラッパー・テキスト(p)すべてに効かせて確実に左寄せする。
@@ -348,8 +353,6 @@ for info in LEVELS:
     st.sidebar.write(f"Lv{lv}：{status}")
 
 st.sidebar.divider()
-st.sidebar.subheader("全体の進捗情報")
-render_progress_donut(st.sidebar)
 st.sidebar.button("進捗をリセット", on_click=reset_progress)
 
 
