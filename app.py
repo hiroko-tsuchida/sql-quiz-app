@@ -257,9 +257,9 @@ st.sidebar.caption(f"MySQL の書き方で学ぶ・Lv1〜Lv{MAX_LEVEL}")
 # 全体の達成率（合格したレベルの割合）を、レベル選択ボタンの上に表示する
 _passed_n = len(ss.passed)
 _pct = round(_passed_n / MAX_LEVEL * 100)
+st.sidebar.progress(_passed_n / MAX_LEVEL)
 st.sidebar.metric("達成率", f"{_pct}%")
 st.sidebar.caption(f"{MAX_LEVEL} レベル中 {_passed_n} レベル合格")
-st.sidebar.progress(_passed_n / MAX_LEVEL)
 st.sidebar.divider()
 
 st.sidebar.subheader("レベルを選ぶ")
