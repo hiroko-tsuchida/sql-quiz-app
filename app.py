@@ -194,6 +194,22 @@ def go_next():
             ss.level_score[ss.round_level] = (full, full)
 
 
+def retry_wrong_now():
+    """最後の問題まで解き終えた画面から、結果画面を経ずに
+    『間違えた問題だけ』の再挑戦をすぐ始める。
+
+    go_next（結果を見る）を通らないので、初回ラウンドの点数記録だけは
+    ここで go_next と同じように済ませておく。間違いが残っている前提なので、
+    満点に更新する処理（wrong が空のときの処理）は不要。
+    """
+    lv = ss.round_level
+    wrong_ids = sorted(ss.wrong)
+    if ss.is_first_round:
+        ss.level_score[lv] = (ss.first_correct, len(ss.queue))
+    start_round(lv, wrong_ids, False)
+    ss.scroll_to_top = True  # 次の画面ではページ先頭へスクロールする
+
+
 def reset_progress():
     """進捗をすべて初期化する。"""
     for key, value in DEFAULTS.items():
@@ -462,18 +478,36 @@ def render_question(problem: dict):
 
         # 「次の問題」「今日はここまで」は解説の上に置く
         is_last = ss.pos >= len(ss.queue) - 1
-        col_next, col_end = st.columns(2)
-        with col_next:
-            st.button(
-                "結果を見る" if is_last else "次の問題",
-                type="primary",
-                on_click=go_next,
-                use_container_width=True,
-            )
+        # 最後の問題まで解き終わって、まだ間違いが残っているか
+        has_wrong = is_last and bool(ss.wrong)
+        col_main, col_end = st.columns(2)
+        with col_main:
+            if has_wrong:
+                # 結果画面を経ずに、その場で間違えた問題だけ再挑戦できるようにする
+                st.button(
+                    "間違えた問題をもう一度 🔁",
+                    type="primary",
+                    on_click=retry_wrong_now,
+                    use_container_width=True,
+                )
+            else:
+                st.button(
+                    "結果を見る" if is_last else "次の問題",
+                    type="primary",
+                    on_click=go_next,
+                    use_container_width=True,
+                )
         with col_end:
             st.button(
                 "🌙 今日はここまで",
                 on_click=end_session,
+                use_container_width=True,
+            )
+        if has_wrong:
+            # 正解数や間違いの一覧をまとめて見たい人向けに、結果画面も残す
+            st.button(
+                "結果を見る（正解数・間違いの一覧）",
+                on_click=go_next,
                 use_container_width=True,
             )
 
