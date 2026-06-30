@@ -3,7 +3,7 @@
 1 問は辞書（dict）で表します。キーの意味:
   id          … 通し番号
   topic       … 項目（トピック）。学習の区分け
-  level       … 攻略レベル 1〜14（小さいほどやさしい。下の LEVELS と対応）
+  level       … 攻略レベル 1〜15（小さいほどやさしい。下の LEVELS と対応）
   question    … 問題文
   choices     … 4つの選択肢（SQL 文字列のリスト）。1つだけが正解
   answer_index… choices の中で正解が何番目か（0〜3）
@@ -27,7 +27,7 @@ TOPICS = [
     "ウィンドウ関数",
 ]
 
-# レベル（攻略の段階）。やさしい順に Lv1〜Lv14。
+# レベル（攻略の段階）。やさしい順に Lv1〜Lv15。
 # 各問題の "level" がこの番号に対応します。どのレベルからでも挑戦できます。
 LEVELS = [
     {"level": 1,  "title": "SQL はじめの一歩", "desc": "まずはここから・SELECT で取り出す・* はすべての列"},
@@ -42,8 +42,9 @@ LEVELS = [
     {"level": 10,  "title": "CASE と関数", "desc": "CASE 式・条件分岐・日付のしぼり込み"},
     {"level": 11, "title": "簡単なテーブル結合①", "desc": "2つの表を ON でつなぐ・JOIN のいちばん基本"},
     {"level": 12, "title": "テーブル結合②", "desc": "LEFT JOIN・3つの表・名前（部署名）の組み立て"},
-    {"level": 13, "title": "サブクエリ", "desc": "クエリの中にクエリ・段階的な絞り込み"},
-    {"level": 14, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
+    {"level": 13, "title": "簡単なサブクエリ①", "desc": "() の中で1つの値を求めて = や > で比べる・基本"},
+    {"level": 14, "title": "サブクエリ②", "desc": "クエリの中にクエリ・IN / NOT IN・相関サブクエリ"},
+    {"level": 15, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
 ]
 
 
@@ -622,13 +623,178 @@ PROBLEMS = [
     # 項目5: サブクエリ
     # =====================================================================
     {
+        # Lv13 のいちばん最初に置く、やさしい入門のサブクエリ問題。
+        # 「() の中で1つの値を求めて、それと = で比べる」基本だけを問う。
+        "id": 57,
+        "hint": (
+            "- `( SELECT ... )` … カッコの中を先に計算して1つの値にする（サブクエリ）\n"
+            "- 最高額は `MAX(price)`。その値と `=` で比べる"
+        ),
+        "topic": "サブクエリ",
+        "level": 13,
+        "question": "products（商品）テーブルから、単価（price）がいちばん高い商品の名前（name）を表示してください。（サブクエリで最高額を求めて使いましょう。）",
+        "answer_sql": (
+            "SELECT name\n"
+            "FROM products\n"
+            "WHERE price = (SELECT MAX(price) FROM products);"
+        ),
+        "choices": [
+            "SELECT name\nFROM products\nWHERE price = (SELECT MAX(price) FROM products);",
+            "SELECT name\nFROM products\nWHERE price = MAX(price);",
+            "SELECT name\nFROM products\nWHERE price = (SELECT price FROM products);",
+            "SELECT name\nFROM products\nWHERE price = (SELECT MAX(price));",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "いちばん高い単価の商品を出すには、まず『最高額』を求めて、その値と一致する商品をさがします。\n\n"
+            "・`(SELECT MAX(price) FROM products)` … この丸かっこの中だけで、商品の最高単価を"
+            "1つの数字として求めます。これを『サブクエリ（入れ子の SELECT）』と呼びます。\n"
+            "・`WHERE price = (…)` … 求めた最高額と同じ単価の商品だけを残します。\n\n"
+            "SQL は内側のサブクエリを先に計算し、その結果を使って外側を実行します。"
+        ),
+        "points": (
+            "・`MAX(price)` のような集計は WHERE に直接は書けません。"
+            "いったんサブクエリ `(SELECT MAX(price) FROM products)` にして1つの値にしてから比べます。\n"
+            "・サブクエリの中でも `FROM products` を書き忘れないようにします。"
+        ),
+    },
+    {
+        # Lv13② 社員の最高月給。57 と同じ「= (SELECT MAX ...)」を社員の表で練習。
+        "id": 58,
+        "hint": (
+            "- 最高月給は `MAX(salary)`。サブクエリで1つの値にする\n"
+            "- その値と `=` で比べて、同じ月給の社員をさがす"
+        ),
+        "topic": "サブクエリ",
+        "level": 13,
+        "question": "employees（社員）テーブルから、月給（salary）がいちばん高い社員の名前（name）を表示してください。（サブクエリで最高額を求めて使いましょう。）",
+        "answer_sql": (
+            "SELECT name\n"
+            "FROM employees\n"
+            "WHERE salary = (SELECT MAX(salary) FROM employees);"
+        ),
+        "choices": [
+            "SELECT name\nFROM employees\nWHERE salary = (SELECT MAX(salary) FROM employees);",
+            "SELECT name\nFROM employees\nWHERE salary = MAX(salary);",
+            "SELECT name\nFROM employees\nWHERE salary = (SELECT salary FROM employees);",
+            "SELECT name\nFROM employees\nWHERE salary = (SELECT MAX(salary));",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "いちばん月給が高い社員を出すには、まず『最高月給』を求めて、その値と一致する社員をさがします。\n\n"
+            "・`(SELECT MAX(salary) FROM employees)` … この丸かっこの中だけで最高月給を1つの数字として求めます（サブクエリ）。\n"
+            "・`WHERE salary = (…)` … 求めた最高額と同じ月給の社員だけを残します。"
+        ),
+        "points": (
+            "・`MAX(salary)` を WHERE に直接は書けません。サブクエリにして1つの値にしてから比べます。\n"
+            "・`(SELECT salary FROM employees)` のように複数行を返すサブクエリは `=` では比べられません。"
+        ),
+    },
+    {
+        # Lv13③ 最安値の商品。MIN を使うパターン。
+        "id": 59,
+        "hint": (
+            "- 最安値は `MIN(price)`。サブクエリで1つの値にする\n"
+            "- その値と `=` で比べて、同じ単価の商品をさがす"
+        ),
+        "topic": "サブクエリ",
+        "level": 13,
+        "question": "products（商品）テーブルから、単価（price）がいちばん安い商品の名前（name）を表示してください。（サブクエリで最安値を求めて使いましょう。）",
+        "answer_sql": (
+            "SELECT name\n"
+            "FROM products\n"
+            "WHERE price = (SELECT MIN(price) FROM products);"
+        ),
+        "choices": [
+            "SELECT name\nFROM products\nWHERE price = (SELECT MIN(price) FROM products);",
+            "SELECT name\nFROM products\nWHERE price = MIN(price);",
+            "SELECT name\nFROM products\nWHERE price = (SELECT price FROM products);",
+            "SELECT name\nFROM products\nWHERE price = (SELECT MIN(price));",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "いちばん安い商品を出すには、まず『最安値』を `MIN(price)` で求めて、その値と一致する商品をさがします。\n\n"
+            "・`(SELECT MIN(price) FROM products)` … 最安値を1つの数字として求めるサブクエリです。\n"
+            "・`WHERE price = (…)` … その最安値と同じ単価の商品だけを残します。"
+        ),
+        "points": (
+            "・最大は `MAX`、最小は `MIN`。求めたい値で使い分けます。\n"
+            "・集計（MIN）は WHERE に直接書けないので、サブクエリにして1つの値にしてから比べます。"
+        ),
+    },
+    {
+        # Lv13④ 平均より高い（> AVG）。比較が = ではなく > のパターン。
+        "id": 60,
+        "hint": (
+            "- 平均は `AVG(price)`。サブクエリで1つの値にする\n"
+            "- 「より高い」は `>` で比べる"
+        ),
+        "topic": "サブクエリ",
+        "level": 13,
+        "question": "products（商品）テーブルから、平均単価（price の平均）より高い商品の名前（name）と単価（price）を表示してください。",
+        "answer_sql": (
+            "SELECT name, price\n"
+            "FROM products\n"
+            "WHERE price > (SELECT AVG(price) FROM products);"
+        ),
+        "choices": [
+            "SELECT name, price\nFROM products\nWHERE price > (SELECT AVG(price) FROM products);",
+            "SELECT name, price\nFROM products\nWHERE price > AVG(price);",
+            "SELECT name, price\nFROM products\nHAVING price > (SELECT AVG(price) FROM products);",
+            "SELECT name, price\nFROM products\nWHERE price > (SELECT price FROM products);",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "平均より高い商品を出すには、まず平均単価を求めて、その値より大きい商品をさがします。\n\n"
+            "・`(SELECT AVG(price) FROM products)` … 平均単価を1つの数字として求めるサブクエリです。\n"
+            "・`WHERE price > (…)` … 求めた平均より単価が高い商品だけを残します。\n\n"
+            "比べ方を `=` から `>` に変えるだけで、『平均より上』が取り出せます。"
+        ),
+        "points": (
+            "・1つの値を返すサブクエリは、`=` だけでなく `>` や `<` でも比べられます。\n"
+            "・`AVG(price)` を WHERE に直接は書けません。サブクエリにして1つの値にしてから比べます。"
+        ),
+    },
+    {
+        # Lv13⑤ 最も月給が低い社員（MIN を社員の表で）。
+        "id": 61,
+        "hint": (
+            "- 最低額は `MIN(salary)`。サブクエリで1つの値にする\n"
+            "- その値と `=` で比べて、同じ月給の社員をさがす"
+        ),
+        "topic": "サブクエリ",
+        "level": 13,
+        "question": "employees（社員）テーブルから、月給（salary）がいちばん低い社員の名前（name）を表示してください。（サブクエリで最低額を求めて使いましょう。）",
+        "answer_sql": (
+            "SELECT name\n"
+            "FROM employees\n"
+            "WHERE salary = (SELECT MIN(salary) FROM employees);"
+        ),
+        "choices": [
+            "SELECT name\nFROM employees\nWHERE salary = (SELECT MIN(salary) FROM employees);",
+            "SELECT name\nFROM employees\nWHERE salary = MIN(salary);",
+            "SELECT name\nFROM employees\nWHERE salary = (SELECT salary FROM employees);",
+            "SELECT name\nFROM employees\nWHERE salary = (SELECT MIN(salary));",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "いちばん月給が低い社員を出すには、まず『最低月給』を `MIN(salary)` で求めて、その値と一致する社員をさがします。\n\n"
+            "・`(SELECT MIN(salary) FROM employees)` … 最低月給を1つの数字として求めるサブクエリです。\n"
+            "・`WHERE salary = (…)` … その最低額と同じ月給の社員だけを残します。"
+        ),
+        "points": (
+            "・やり方は最高月給のときと同じで、`MAX` を `MIN` に変えるだけです。\n"
+            "・集計は WHERE に直接書けないので、サブクエリにして1つの値にしてから比べます。"
+        ),
+    },
+    {
         "id": 13,
         "hint": (
             "- `( SELECT ... )` … カッコの中を先に計算（サブクエリ）\n"
             "- 1つの値を返すサブクエリは `>` などで比較できる"
         ),
         "topic": "サブクエリ",
-        "level": 13,
+        "level": 14,
         "question": "employees（社員）テーブルの、全社員の平均月給より月給（salary）が高い社員の名前（name）と月給（salary）を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -661,7 +827,7 @@ PROBLEMS = [
             "- `NOT IN (...)` … 一覧の「どれにも一致しない」"
         ),
         "topic": "サブクエリ",
-        "level": 13,
+        "level": 14,
         "question": "employees（社員）テーブルの、一度も注文（orders）を担当していない社員の名前（name）を表示してください。",
         "answer_sql": (
             "SELECT name\n"
@@ -694,7 +860,7 @@ PROBLEMS = [
             "- `department_id = e.department_id` で「同じ部署内」を指す"
         ),
         "topic": "サブクエリ",
-        "level": 13,
+        "level": 14,
         "question": "employees（社員）テーブルの、各部署で最も月給（salary）が高い社員の部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT e.department_id, e.name, e.salary\n"
@@ -945,7 +1111,7 @@ PROBLEMS = [
             "- `OVER(...)` の中で「どう並べるか」を指定"
         ),
         "topic": "ウィンドウ関数",
-        "level": 14,
+        "level": 15,
         "question": "employees（社員）テーブルの全社員に、月給（salary）の高い順の順位を付け、名前・月給・順位を表示してください。",
         "answer_sql": (
             "SELECT name, salary,\n"
@@ -978,7 +1144,7 @@ PROBLEMS = [
             "- `ORDER BY` で各グループ内の並び順を決める"
         ),
         "topic": "ウィンドウ関数",
-        "level": 14,
+        "level": 15,
         "question": "employees（社員）テーブルを部署ごとに分け、月給（salary）の高い順に順位を付けて、部署ID・名前・月給と部署内順位を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary,\n"
@@ -1011,7 +1177,7 @@ PROBLEMS = [
             "- `ROW_NUMBER()` は 1,2,3… の連番"
         ),
         "topic": "ウィンドウ関数",
-        "level": 14,
+        "level": 15,
         "question": "employees（社員）テーブルの、各部署で月給（salary）が最も高い社員（部署内1位）の部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary\n"
