@@ -3,7 +3,7 @@
 1 問は辞書（dict）で表します。キーの意味:
   id          … 通し番号
   topic       … 項目（トピック）。学習の区分け
-  level       … 攻略レベル 1〜15（小さいほどやさしい。下の LEVELS と対応）
+  level       … 攻略レベル 1〜16（小さいほどやさしい。下の LEVELS と対応）
   question    … 問題文
   choices     … 4つの選択肢（SQL 文字列のリスト）。1つだけが正解
   answer_index… choices の中で正解が何番目か（0〜3）
@@ -44,7 +44,8 @@ LEVELS = [
     {"level": 12, "title": "テーブル結合②", "desc": "LEFT JOIN・3つの表・名前（部署名）の組み立て"},
     {"level": 13, "title": "簡単なサブクエリ①", "desc": "() の中で1つの値を求めて = や > で比べる・基本"},
     {"level": 14, "title": "サブクエリ②", "desc": "クエリの中にクエリ・IN / NOT IN・相関サブクエリ"},
-    {"level": 15, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
+    {"level": 15, "title": "簡単なウィンドウ関数①", "desc": "ROW_NUMBER・RANK・OVER() のいちばん基本"},
+    {"level": 16, "title": "ウィンドウ関数②", "desc": "PARTITION BY・サブクエリと組み合わせる総仕上げ"},
 ]
 
 
@@ -1105,13 +1106,179 @@ PROBLEMS = [
     # 項目8: ウィンドウ関数
     # =====================================================================
     {
+        # Lv15① いちばん基本の ROW_NUMBER（連番）。
+        "id": 62,
+        "hint": (
+            "- `ROW_NUMBER() OVER (ORDER BY ...)` … 並べた順に 1,2,3… の連番を付ける\n"
+            "- `OVER (...)` の中で「どう並べるか」を指定する"
+        ),
+        "topic": "ウィンドウ関数",
+        "level": 15,
+        "question": "products（商品）テーブルの各商品に、単価（price）の高い順の連番（1,2,3…）を付けて、商品名（name）・単価（price）・連番を表示してください。",
+        "answer_sql": (
+            "SELECT name, price,\n"
+            "       ROW_NUMBER() OVER (ORDER BY price DESC) AS 連番\n"
+            "FROM products;"
+        ),
+        "choices": [
+            "SELECT name, price,\n       ROW_NUMBER() OVER (ORDER BY price DESC) AS 連番\nFROM products;",
+            "SELECT name, price,\n       ROW_NUMBER() AS 連番\nFROM products\nORDER BY price DESC;",
+            "SELECT name, price,\n       ROW_NUMBER() (ORDER BY price DESC) AS 連番\nFROM products;",
+            "SELECT name, price,\n       ROW_NUMBER(price) OVER (ORDER BY price DESC) AS 連番\nFROM products;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "1行ずつに連番を付けるには、ウィンドウ関数の `ROW_NUMBER()` を使います。\n\n"
+            "・`ROW_NUMBER() OVER (ORDER BY price DESC)` … "
+            "単価の高い順に並べたときの 1,2,3… の番号を、各行に付けます。\n"
+            "・`OVER (...)` の中で『どう並べて番号を付けるか』を指定するのが特徴です。\n\n"
+            "GROUP BY と違い、行をまとめずに1行ずつ残したまま番号を付けられます。"
+        ),
+        "points": (
+            "・ウィンドウ関数は必ず `OVER (...)` を付けます。`OVER` を書き忘れるとただの関数呼び出しになりエラーです。\n"
+            "・`ROW_NUMBER()` のカッコの中は空。並べ方は `OVER (ORDER BY ...)` の側に書きます。"
+        ),
+    },
+    {
+        # Lv15② RANK（順位）。同点の扱いが ROW_NUMBER と違う。
+        "id": 63,
+        "hint": (
+            "- `RANK() OVER (ORDER BY ...)` … 並べた順に順位を付ける\n"
+            "- 同じ値は同じ順位（次は飛ぶ）。連番なら `ROW_NUMBER`"
+        ),
+        "topic": "ウィンドウ関数",
+        "level": 15,
+        "question": "products（商品）テーブルの各商品に、単価（price）の高い順の順位を付けて、商品名（name）・単価（price）・順位を表示してください。",
+        "answer_sql": (
+            "SELECT name, price,\n"
+            "       RANK() OVER (ORDER BY price DESC) AS 順位\n"
+            "FROM products;"
+        ),
+        "choices": [
+            "SELECT name, price,\n       RANK() OVER (ORDER BY price DESC) AS 順位\nFROM products;",
+            "SELECT name, price,\n       RANK() AS 順位\nFROM products\nORDER BY price DESC;",
+            "SELECT name, price,\n       RANK(price) OVER (ORDER BY price DESC) AS 順位\nFROM products;",
+            "SELECT name, price,\n       RANK() OVER (price DESC) AS 順位\nFROM products;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "順位を付けるには `RANK()` が便利です。\n\n"
+            "・`RANK() OVER (ORDER BY price DESC)` … 単価の高い順に並べたときの順位を各行に付けます。\n"
+            "・`OVER (...)` の中で『どう並べて順位を付けるか』を `ORDER BY` で指定します。\n\n"
+            "`ROW_NUMBER` が必ず 1,2,3… と連番になるのに対し、`RANK` は同じ値なら同じ順位になります。"
+        ),
+        "points": (
+            "・`RANK` は同点があると次の順位を飛ばします（1,1,3…）。飛ばしたくないときは `DENSE_RANK`。\n"
+            "・並べ方は `OVER (ORDER BY ...)` の中に書きます。`OVER (price DESC)` のように `ORDER BY` を抜かさないこと。"
+        ),
+    },
+    {
+        # Lv15③ OVER() 空 … 全体の集計を各行の横に並べる。
+        "id": 64,
+        "hint": (
+            "- `AVG(salary) OVER ()` … カッコを空にすると『全体』が対象\n"
+            "- 行はまとめず、各行の横に全体平均を並べられる"
+        ),
+        "topic": "ウィンドウ関数",
+        "level": 15,
+        "question": "employees（社員）テーブルの各社員の名前（name）・月給（salary）に加えて、全社員の平均月給を同じ行に並べて表示してください。（AVG(...) OVER () を使います）",
+        "answer_sql": (
+            "SELECT name, salary,\n"
+            "       AVG(salary) OVER () AS 全体平均\n"
+            "FROM employees;"
+        ),
+        "choices": [
+            "SELECT name, salary,\n       AVG(salary) OVER () AS 全体平均\nFROM employees;",
+            "SELECT name, salary,\n       AVG(salary) AS 全体平均\nFROM employees;",
+            "SELECT name, salary,\n       AVG(salary) OVER AS 全体平均\nFROM employees;",
+            "SELECT name, salary,\n       SUM(salary) OVER () AS 全体平均\nFROM employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "集計関数のうしろに `OVER ()` を付けると、ウィンドウ関数として『行をまとめずに』使えます。\n\n"
+            "・`AVG(salary) OVER ()` … カッコを空にすると、対象は『全体（すべての行）』です。"
+            "各社員の行はそのまま残しつつ、全社員の平均月給を同じ行に並べて表示できます。\n\n"
+            "ふつうの `AVG(salary)`（OVER なし）だと、行が1つにまとまってしまい、名前を並べて出せません。"
+        ),
+        "points": (
+            "・`OVER ()`（空カッコ）は『全体が対象』という意味。`OVER` を付けないと普通の集計になります。\n"
+            "・`OVER` のうしろのカッコは省略できません（`OVER AS` のような書き方はエラー）。"
+        ),
+    },
+    {
+        # Lv15④ ROW_NUMBER をもう一度、別の並び（入社順）で。
+        "id": 65,
+        "hint": (
+            "- 古い順は `ORDER BY hire_date`（昇順）\n"
+            "- `ROW_NUMBER() OVER (ORDER BY ...)` で連番を付ける"
+        ),
+        "topic": "ウィンドウ関数",
+        "level": 15,
+        "question": "employees（社員）テーブルの各社員に、入社日（hire_date）が古い順の連番を付けて、名前（name）・入社日（hire_date）・連番を表示してください。",
+        "answer_sql": (
+            "SELECT name, hire_date,\n"
+            "       ROW_NUMBER() OVER (ORDER BY hire_date) AS 入社順\n"
+            "FROM employees;"
+        ),
+        "choices": [
+            "SELECT name, hire_date,\n       ROW_NUMBER() OVER (ORDER BY hire_date) AS 入社順\nFROM employees;",
+            "SELECT name, hire_date,\n       ROW_NUMBER() OVER (ORDER BY hire_date DESC) AS 入社順\nFROM employees;",
+            "SELECT name, hire_date,\n       ROW_NUMBER() AS 入社順\nFROM employees\nORDER BY hire_date;",
+            "SELECT name, hire_date,\n       ROW_NUMBER() (ORDER BY hire_date) AS 入社順\nFROM employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "連番の付け方は単価のときと同じで、並べ方を変えるだけです。\n\n"
+            "・`ORDER BY hire_date` … 入社日を古い順（昇順）に並べます。日付は小さいほど古いです。\n"
+            "・`ROW_NUMBER() OVER (ORDER BY hire_date)` … その順に 1,2,3… の連番を付けます。\n\n"
+            "新しい順にしたいときは `ORDER BY hire_date DESC` にします。"
+        ),
+        "points": (
+            "・『古い順』は昇順（`ASC`、省略可）。`DESC` にすると新しい順になってしまいます。\n"
+            "・並べ方は `OVER (ORDER BY ...)` の中。`OVER` の書き忘れに注意。"
+        ),
+    },
+    {
+        # Lv15⑤ SUM OVER() … 全体合計を各行の横に。
+        "id": 66,
+        "hint": (
+            "- `SUM(quantity) OVER ()` … カッコを空にすると『全体の合計』\n"
+            "- 各行はそのまま残り、横に合計が並ぶ"
+        ),
+        "topic": "ウィンドウ関数",
+        "level": 15,
+        "question": "orders（注文）テーブルの各注文の id・数量（quantity）に加えて、全注文の数量の合計を同じ行に並べて表示してください。（SUM(...) OVER () を使います）",
+        "answer_sql": (
+            "SELECT id, quantity,\n"
+            "       SUM(quantity) OVER () AS 合計\n"
+            "FROM orders;"
+        ),
+        "choices": [
+            "SELECT id, quantity,\n       SUM(quantity) OVER () AS 合計\nFROM orders;",
+            "SELECT id, quantity,\n       SUM(quantity) AS 合計\nFROM orders;",
+            "SELECT id, quantity,\n       SUM(quantity) OVER AS 合計\nFROM orders;",
+            "SELECT id, quantity,\n       AVG(quantity) OVER () AS 合計\nFROM orders;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "`SUM(quantity) OVER ()` とすると、行をまとめずに『全体の合計』を各行の横に並べられます。\n\n"
+            "・`OVER ()`（空カッコ）… 対象は全注文。各注文の id・数量はそのまま残ります。\n"
+            "・横に並ぶ『合計』はどの行も同じ値（全注文の数量合計）になります。\n\n"
+            "ふつうの `SUM(quantity)`（OVER なし）だと、行が1つにまとまり id を並べられません。"
+        ),
+        "points": (
+            "・`OVER ()` を付けると集計を『行を残したまま』使えるのがウィンドウ関数の便利なところです。\n"
+            "・関数を変えれば平均（AVG）・最大（MAX）なども同じように横に並べられます。"
+        ),
+    },
+    {
         "id": 22,
         "hint": (
             "- `RANK() OVER (ORDER BY ...)` … 並べた順に順位を付ける\n"
             "- `OVER(...)` の中で「どう並べるか」を指定"
         ),
         "topic": "ウィンドウ関数",
-        "level": 15,
+        "level": 16,
         "question": "employees（社員）テーブルの全社員に、月給（salary）の高い順の順位を付け、名前・月給・順位を表示してください。",
         "answer_sql": (
             "SELECT name, salary,\n"
@@ -1144,7 +1311,7 @@ PROBLEMS = [
             "- `ORDER BY` で各グループ内の並び順を決める"
         ),
         "topic": "ウィンドウ関数",
-        "level": 15,
+        "level": 16,
         "question": "employees（社員）テーブルを部署ごとに分け、月給（salary）の高い順に順位を付けて、部署ID・名前・月給と部署内順位を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary,\n"
@@ -1177,7 +1344,7 @@ PROBLEMS = [
             "- `ROW_NUMBER()` は 1,2,3… の連番"
         ),
         "topic": "ウィンドウ関数",
-        "level": 15,
+        "level": 16,
         "question": "employees（社員）テーブルの、各部署で月給（salary）が最も高い社員（部署内1位）の部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary\n"
