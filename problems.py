@@ -3,7 +3,7 @@
 1 問は辞書（dict）で表します。キーの意味:
   id          … 通し番号
   topic       … 項目（トピック）。学習の区分け
-  level       … 攻略レベル 1〜13（小さいほどやさしい。下の LEVELS と対応）
+  level       … 攻略レベル 1〜14（小さいほどやさしい。下の LEVELS と対応）
   question    … 問題文
   choices     … 4つの選択肢（SQL 文字列のリスト）。1つだけが正解
   answer_index… choices の中で正解が何番目か（0〜3）
@@ -27,7 +27,7 @@ TOPICS = [
     "ウィンドウ関数",
 ]
 
-# レベル（攻略の段階）。やさしい順に Lv1〜Lv13。
+# レベル（攻略の段階）。やさしい順に Lv1〜Lv14。
 # 各問題の "level" がこの番号に対応します。どのレベルからでも挑戦できます。
 LEVELS = [
     {"level": 1,  "title": "SQL はじめの一歩", "desc": "まずはここから・SELECT で取り出す・* はすべての列"},
@@ -40,9 +40,10 @@ LEVELS = [
     {"level": 8,  "title": "並び替えと重複", "desc": "ORDER BY（昇順/降順）・DISTINCT・LIMIT"},
     {"level": 9,  "title": "集計（GROUP BY）", "desc": "COUNT/SUM/AVG/MAX・GROUP BY・HAVING"},
     {"level": 10,  "title": "CASE と関数", "desc": "CASE 式・条件分岐・日付のしぼり込み"},
-    {"level": 11, "title": "テーブル結合（JOIN）", "desc": "複数の表をつなぐ・名前（部署名）の組み立て"},
-    {"level": 12, "title": "サブクエリ", "desc": "クエリの中にクエリ・段階的な絞り込み"},
-    {"level": 13, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
+    {"level": 11, "title": "簡単なテーブル結合①", "desc": "2つの表を ON でつなぐ・JOIN のいちばん基本"},
+    {"level": 12, "title": "テーブル結合②", "desc": "LEFT JOIN・3つの表・名前（部署名）の組み立て"},
+    {"level": 13, "title": "サブクエリ", "desc": "クエリの中にクエリ・段階的な絞り込み"},
+    {"level": 14, "title": "ウィンドウ関数", "desc": "RANK・ROW_NUMBER などの総仕上げ"},
 ]
 
 
@@ -337,13 +338,189 @@ PROBLEMS = [
     # 項目4: テーブル結合（JOIN）
     # =====================================================================
     {
+        # Lv11 のいちばん最初に置く、やさしい入門の JOIN 問題。
+        # 列名がぶつからない orders × products で「ON でつなぐ」基本だけを問う。
+        "id": 52,
+        "hint": (
+            "- `JOIN` … 2つの表をつなげる\n"
+            "- `ON A = B` でどの列どうしを合わせるか指定する"
+        ),
+        "topic": "テーブル結合（JOIN）",
+        "level": 11,
+        "question": "orders（注文）テーブルと products（商品）テーブルを結合して、各注文の商品名（name）と数量（quantity）を表示してください。",
+        "answer_sql": (
+            "SELECT products.name, orders.quantity\n"
+            "FROM orders\n"
+            "INNER JOIN products\n"
+            "  ON orders.product_id = products.id;"
+        ),
+        "choices": [
+            "SELECT products.name, orders.quantity\nFROM orders\nINNER JOIN products\n  ON orders.product_id = products.id;",
+            "SELECT products.name, orders.quantity\nFROM orders\nINNER JOIN products;",
+            "SELECT products.name, orders.quantity\nFROM orders\nINNER JOIN products\n  ON orders.id = products.id;",
+            "SELECT products.name, orders.quantity\nFROM orders, products;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "注文の表には商品の『ID（product_id）』しかなく、商品の『名前』は商品の表にあります。"
+            "2つの表をつなげて名前を取り出すのが JOIN（結合）です。\n\n"
+            "・`INNER JOIN products` … 商品の表をつなげる\n"
+            "・`ON orders.product_id = products.id` … "
+            "『注文の商品ID』と『商品のID』が一致する行どうしを結びつけます。\n\n"
+            "つなげたあとは `products.name`（商品名）や `orders.quantity`（数量）のように"
+            "『表名.列名』で取り出せます。"
+        ),
+        "points": (
+            "・JOIN の決め手は `ON` のつなぎ方（どの列とどの列が一致するか）です。\n"
+            "・`ON` を書き忘れたり、`FROM orders, products` だけにすると、行が正しく結びつきません。"
+        ),
+    },
+    {
+        # Lv11② 注文 × 社員。担当した社員の名前を引いてくる。
+        "id": 53,
+        "hint": (
+            "- 注文の `employee_id` と、社員の `id` を `ON` で合わせる\n"
+            "- つなげたら `employees.name` で担当者名を取り出せる"
+        ),
+        "topic": "テーブル結合（JOIN）",
+        "level": 11,
+        "question": "orders（注文）テーブルと employees（社員）テーブルを結合して、各注文の担当社員の名前（name）と数量（quantity）を表示してください。",
+        "answer_sql": (
+            "SELECT employees.name, orders.quantity\n"
+            "FROM orders\n"
+            "INNER JOIN employees\n"
+            "  ON orders.employee_id = employees.id;"
+        ),
+        "choices": [
+            "SELECT employees.name, orders.quantity\nFROM orders\nINNER JOIN employees\n  ON orders.employee_id = employees.id;",
+            "SELECT employees.name, orders.quantity\nFROM orders\nINNER JOIN employees;",
+            "SELECT employees.name, orders.quantity\nFROM orders\nINNER JOIN employees\n  ON orders.id = employees.id;",
+            "SELECT employees.name, orders.quantity\nFROM orders, employees;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "注文の表には『担当した社員のID（employee_id）』しかありません。"
+            "社員の名前は社員の表にあるので、JOIN でつなげて取り出します。\n\n"
+            "・`INNER JOIN employees` … 社員の表をつなげる\n"
+            "・`ON orders.employee_id = employees.id` … "
+            "『注文の担当社員ID』と『社員のID』が一致する行どうしを結びつけます。"
+        ),
+        "points": (
+            "・どの列とどの列を合わせるかを `ON` で正しく指定するのが大事です。\n"
+            "・`ON` を書かない／`FROM orders, employees` だけ、では正しく結びつきません。"
+        ),
+    },
+    {
+        # Lv11③ 社員 × 部署。部署名は別表にあるので JOIN で引く。
+        # name が両表にあるので、部署側は AS 部署名 で見出しを分かりやすくする（AS は Lv3 で学習済み）。
+        "id": 54,
+        "hint": (
+            "- 社員の `department_id` と、部署の `id` を `ON` で合わせる\n"
+            "- 同じ `name` がぶつかるので部署側は `AS 部署名` で見出しを付ける"
+        ),
+        "topic": "テーブル結合（JOIN）",
+        "level": 11,
+        "question": "employees（社員）テーブルと departments（部署）テーブルを結合して、各社員の名前（name）と所属する部署名（departments.name）を表示してください。",
+        "answer_sql": (
+            "SELECT employees.name, departments.name AS 部署名\n"
+            "FROM employees\n"
+            "INNER JOIN departments\n"
+            "  ON employees.department_id = departments.id;"
+        ),
+        "choices": [
+            "SELECT employees.name, departments.name AS 部署名\nFROM employees\nINNER JOIN departments\n  ON employees.department_id = departments.id;",
+            "SELECT employees.name, departments.name AS 部署名\nFROM employees\nINNER JOIN departments;",
+            "SELECT employees.name, departments.name AS 部署名\nFROM employees\nINNER JOIN departments\n  ON employees.id = departments.id;",
+            "SELECT employees.name, departments.name AS 部署名\nFROM employees, departments;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "社員の表には部署の『ID（department_id）』しかなく、部署名は部署の表にあります。"
+            "JOIN でつなげて名前を取り出します。\n\n"
+            "・`ON employees.department_id = departments.id` … "
+            "『社員の部署ID』と『部署のID』が一致する行どうしを結びつけます。\n"
+            "・社員にも部署にも `name` 列があるので、`departments.name AS 部署名` のように"
+            "別名（AS）を付けると、どちらの名前か分かりやすくなります。"
+        ),
+        "points": (
+            "・つなぐ列は『社員の department_id』と『部署の id』。`ON` の左右をまちがえないこと。\n"
+            "・同じ列名がぶつかるときは `表名.列名` で区別し、`AS` で見出しを付けると読みやすいです。"
+        ),
+    },
+    {
+        # Lv11④ 注文 × 商品（id52 と同じ結合を、別の列で練習）。
+        "id": 55,
+        "hint": (
+            "- つなぎ方は id の小さい注文×商品の問題と同じ\n"
+            "- 取り出す列を `orders.order_date`（注文日）に変えるだけ"
+        ),
+        "topic": "テーブル結合（JOIN）",
+        "level": 11,
+        "question": "orders（注文）テーブルと products（商品）テーブルを結合して、各注文の商品名（name）と注文日（order_date）を表示してください。",
+        "answer_sql": (
+            "SELECT products.name, orders.order_date\n"
+            "FROM orders\n"
+            "INNER JOIN products\n"
+            "  ON orders.product_id = products.id;"
+        ),
+        "choices": [
+            "SELECT products.name, orders.order_date\nFROM orders\nINNER JOIN products\n  ON orders.product_id = products.id;",
+            "SELECT products.name, orders.order_date\nFROM orders\nINNER JOIN products;",
+            "SELECT products.name, orders.order_date\nFROM orders\nINNER JOIN products\n  ON orders.id = products.id;",
+            "SELECT products.name, orders.order_date\nFROM orders, products;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "つなぎ方は商品名・数量を出したときと同じで、`ON orders.product_id = products.id` です。\n\n"
+            "取り出す列を変えるだけで、いろいろな情報を組み合わせて表示できます。"
+            "ここでは商品名（`products.name`）と注文日（`orders.order_date`）を並べています。"
+        ),
+        "points": (
+            "・JOIN の `ON` が同じなら、SELECT で取り出す列は自由に選べます。\n"
+            "・どの表の列かは `表名.列名` ではっきりさせると、まちがいが減ります。"
+        ),
+    },
+    {
+        # Lv11⑤ 社員 × 部署（3列）。54 と同じ結合で、月給も一緒に出す。
+        "id": 56,
+        "hint": (
+            "- 社員 × 部署のつなぎ方は前と同じ（`ON` で department_id = id）\n"
+            "- SELECT に `employees.salary` を足すだけ"
+        ),
+        "topic": "テーブル結合（JOIN）",
+        "level": 11,
+        "question": "employees（社員）テーブルと departments（部署）テーブルを結合して、各社員の名前（name）・部署名（departments.name）・月給（salary）を表示してください。",
+        "answer_sql": (
+            "SELECT employees.name, departments.name AS 部署名, employees.salary\n"
+            "FROM employees\n"
+            "INNER JOIN departments\n"
+            "  ON employees.department_id = departments.id;"
+        ),
+        "choices": [
+            "SELECT employees.name, departments.name AS 部署名, employees.salary\nFROM employees\nINNER JOIN departments\n  ON employees.department_id = departments.id;",
+            "SELECT employees.name, departments.name AS 部署名, employees.salary\nFROM employees\nINNER JOIN departments;",
+            "SELECT employees.name, departments.name AS 部署名, employees.salary\nFROM employees\nINNER JOIN departments\n  ON employees.id = departments.id;",
+            "SELECT employees.name, departments.name AS 部署名, employees.salary\nFROM employees, departments;",
+        ],
+        "answer_index": 0,
+        "explanation": (
+            "結合のしかたは社員名・部署名を出したときと同じです。"
+            "`ON employees.department_id = departments.id` でつなぎます。\n\n"
+            "あとは SELECT に `employees.salary`（月給）を足すだけで、3列を並べて表示できます。"
+        ),
+        "points": (
+            "・一度つなげてしまえば、両方の表の列を自由に組み合わせて取り出せます。\n"
+            "・`employees.salary` のように、どの表の列かを `表名.列名` で示すと安全です。"
+        ),
+    },
+    {
         "id": 10,
         "hint": (
             "- `JOIN` … 2つの表をつなげる\n"
             "- `ON A = B` でどの列どうしを一致させるか指定"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 11,
+        "level": 12,
         "question": "employees（社員）テーブルの各社員について、名前（name）と所属する部署の名前を表示してください。（社員の表にある部署番号を、部署の表で名前に置きかえるイメージです。）",
         "answer_sql": (
             "SELECT employees.name, departments.name AS 部署名\n"
@@ -379,7 +556,7 @@ PROBLEMS = [
             "- `COUNT(列名)` は NULL を数えない（0人を正しく出せる）"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 11,
+        "level": 12,
         "question": "departments（部署）テーブルのすべての部署について、部署名と社員数を表示してください。社員が 0人の部署も 0と表示してください。",
         "answer_sql": (
             "SELECT departments.name AS 部署名, COUNT(employees.id) AS 人数\n"
@@ -414,7 +591,7 @@ PROBLEMS = [
             "- つなぐたびに `ON` で一致条件を指定する"
         ),
         "topic": "テーブル結合（JOIN）",
-        "level": 11,
+        "level": 12,
         "question": "orders（注文）テーブルの注文ごとに、担当社員の名前・商品名・数量（quantity）を表示してください。",
         "answer_sql": (
             "SELECT employees.name AS 担当者, products.name AS 商品名, orders.quantity AS 数量\n"
@@ -451,7 +628,7 @@ PROBLEMS = [
             "- 1つの値を返すサブクエリは `>` などで比較できる"
         ),
         "topic": "サブクエリ",
-        "level": 12,
+        "level": 13,
         "question": "employees（社員）テーブルの、全社員の平均月給より月給（salary）が高い社員の名前（name）と月給（salary）を表示してください。",
         "answer_sql": (
             "SELECT name, salary\n"
@@ -484,7 +661,7 @@ PROBLEMS = [
             "- `NOT IN (...)` … 一覧の「どれにも一致しない」"
         ),
         "topic": "サブクエリ",
-        "level": 12,
+        "level": 13,
         "question": "employees（社員）テーブルの、一度も注文（orders）を担当していない社員の名前（name）を表示してください。",
         "answer_sql": (
             "SELECT name\n"
@@ -517,7 +694,7 @@ PROBLEMS = [
             "- `department_id = e.department_id` で「同じ部署内」を指す"
         ),
         "topic": "サブクエリ",
-        "level": 12,
+        "level": 13,
         "question": "employees（社員）テーブルの、各部署で最も月給（salary）が高い社員の部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT e.department_id, e.name, e.salary\n"
@@ -619,7 +796,7 @@ PROBLEMS = [
             "- MySQL では `+` で文字はつなげない（`+` は計算になる）"
         ),
         "topic": "文字列・日付の関数",
-        "level": 11,
+        "level": 12,
         "question": "employees（社員）テーブルの社員一覧を、『佐藤（営業）』のように『名前（部署名）』の形の1列で表示してください。",
         "answer_sql": (
             "SELECT CONCAT(employees.name, '（', departments.name, '）') AS 表示名\n"
@@ -768,7 +945,7 @@ PROBLEMS = [
             "- `OVER(...)` の中で「どう並べるか」を指定"
         ),
         "topic": "ウィンドウ関数",
-        "level": 13,
+        "level": 14,
         "question": "employees（社員）テーブルの全社員に、月給（salary）の高い順の順位を付け、名前・月給・順位を表示してください。",
         "answer_sql": (
             "SELECT name, salary,\n"
@@ -801,7 +978,7 @@ PROBLEMS = [
             "- `ORDER BY` で各グループ内の並び順を決める"
         ),
         "topic": "ウィンドウ関数",
-        "level": 13,
+        "level": 14,
         "question": "employees（社員）テーブルを部署ごとに分け、月給（salary）の高い順に順位を付けて、部署ID・名前・月給と部署内順位を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary,\n"
@@ -834,7 +1011,7 @@ PROBLEMS = [
             "- `ROW_NUMBER()` は 1,2,3… の連番"
         ),
         "topic": "ウィンドウ関数",
-        "level": 13,
+        "level": 14,
         "question": "employees（社員）テーブルの、各部署で月給（salary）が最も高い社員（部署内1位）の部署ID・名前・月給を表示してください。",
         "answer_sql": (
             "SELECT department_id, name, salary\n"
