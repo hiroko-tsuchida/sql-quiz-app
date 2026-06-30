@@ -14,8 +14,6 @@ import json
 import os
 import random
 
-import altair as alt
-import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -233,39 +231,6 @@ def resume_session():
     ss.ended = False
 
 
-def render_progress_donut(container):
-    """合格したレベルを輪（ドーナツ）グラフで表示する。"""
-    passed_n = len(ss.passed)
-    df = pd.DataFrame(
-        {
-            "区分": ["合格", "未合格"],
-            "レベル数": [passed_n, MAX_LEVEL - passed_n],
-        }
-    )
-    ring = (
-        alt.Chart(df)
-        .mark_arc(innerRadius=45, outerRadius=70)
-        .encode(
-            theta=alt.Theta("レベル数:Q", stack=True),
-            color=alt.Color(
-                "区分:N",
-                scale=alt.Scale(
-                    domain=["合格", "未合格"], range=["#2E7D32", "#E0E0E0"]
-                ),
-                legend=alt.Legend(title=None, orient="bottom"),
-            ),
-            order=alt.Order("区分:N"),
-            tooltip=["区分:N", "レベル数:Q"],
-        )
-    )
-    center = (
-        alt.Chart(pd.DataFrame({"label": [f"{passed_n}/{MAX_LEVEL}"]}))
-        .mark_text(size=24, fontWeight="bold", color="#2E7D32")
-        .encode(text="label:N")
-    )
-    container.altair_chart(ring + center, use_container_width=True)
-
-
 # =============================================================================
 # 「今日はここまで」終了画面（保存してタブを閉じる）
 # =============================================================================
@@ -289,9 +254,12 @@ if ss.ended:
 st.sidebar.title("🗃️ SQL 問題集")
 st.sidebar.caption(f"MySQL の書き方で学ぶ・Lv1〜Lv{MAX_LEVEL}")
 
-# 全体の達成率（合格レベル数のドーナツ）を、レベル選択ボタンの上に表示する
-st.sidebar.subheader("全体の進捗情報")
-render_progress_donut(st.sidebar)
+# 全体の達成率（合格したレベルの割合）を、レベル選択ボタンの上に表示する
+_passed_n = len(ss.passed)
+_pct = round(_passed_n / MAX_LEVEL * 100)
+st.sidebar.metric("達成率", f"{_pct}%")
+st.sidebar.caption(f"{MAX_LEVEL} レベル中 {_passed_n} レベル合格")
+st.sidebar.progress(_passed_n / MAX_LEVEL)
 st.sidebar.divider()
 
 st.sidebar.subheader("レベルを選ぶ")
